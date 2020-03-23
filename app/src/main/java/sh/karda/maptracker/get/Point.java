@@ -1,6 +1,6 @@
 package sh.karda.maptracker.get;
 
-public class DataItem {
+public class Point {
     public int id;
     public String device;
     float longitude;

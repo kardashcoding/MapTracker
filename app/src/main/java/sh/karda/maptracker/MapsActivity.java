@@ -34,7 +34,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     LocationManager locationManager;
     MarkerOptions mo;
-    Marker marker;
+    int numberOfPresses = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +50,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                numberOfPresses++;
                 GetLocations getLocations = new GetLocations(mMap, getDeviceId());
                 getLocations.execute();
-                LatLngBounds myArea = new LatLngBounds(new LatLng(59.92, 10.61), new LatLng(59.94, 10.62));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(myArea, 200));
+            }
+        });
+        loadButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                numberOfPresses++;
+                if (numberOfPresses == 3) {
+                    GetLocations getLocations = new GetLocations(mMap, "any");
+                    getLocations.execute();
+                }
+                return false;
             }
         });
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);

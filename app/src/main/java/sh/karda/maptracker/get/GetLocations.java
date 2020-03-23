@@ -3,8 +3,10 @@ package sh.karda.maptracker.get;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 
@@ -16,11 +18,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class GetLocations extends AsyncTask<Void, Void, DataItems> {
+public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     private GoogleMap map;
     private String deviceId;
     private String TAG = "GetLocations";
-    private DataItems dataItems;
+    private PositionPoints dataItems;
     public GetLocations(GoogleMap map, String device){
         this.map = map;
         this.deviceId = device;
@@ -55,13 +57,13 @@ public class GetLocations extends AsyncTask<Void, Void, DataItems> {
     }
 
     @Override
-    protected DataItems doInBackground(Void... voids) {
+    protected PositionPoints doInBackground(Void... voids) {
         try {
             JSONObject json = getJSONObjectFromURL();
             Gson gson = new Gson();
 
             String s = json.toString();
-            dataItems = gson.fromJson(s, DataItems.class);
+            dataItems = gson.fromJson(s, PositionPoints.class);
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
@@ -69,14 +71,16 @@ public class GetLocations extends AsyncTask<Void, Void, DataItems> {
     }
 
     @Override
-    protected void onPostExecute(DataItems response){
-        super.onPostExecute(response);
-        for (DataItem item: response.items) {
+    protected void onPostExecute(PositionPoints points){
+        super.onPostExecute(points);
+
+        for (Point item: points.items) {
             LatLng myLocation = new LatLng(item.latitude, item.longitude);
             Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
             map.addMarker(new MarkerOptions().position(myLocation).title(item.date));
         }
-
+        LatLngBounds myArea = new LatLngBounds(new LatLng(points.getMinLatitude(), points.getMinLongitude()), new LatLng(points.getMaxLatitude(), points.getMaxLongitude()));
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(myArea, 200));
     }
 
 }
