@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">MapTracker</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="button_load">Get Locations</string>
+    <string name="url">https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==</string>
+</resources>
