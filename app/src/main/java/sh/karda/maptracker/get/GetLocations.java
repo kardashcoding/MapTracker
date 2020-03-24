@@ -73,6 +73,7 @@ public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     @Override
     protected void onPostExecute(PositionPoints points){
         super.onPostExecute(points);
+        if (points == null || points.items == null || points.items.size() == 0) return;
 
         for (Point item: points.items) {
             LatLng myLocation = new LatLng(item.latitude, item.longitude);

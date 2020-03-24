@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -58,12 +59,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                Toast.makeText(getApplicationContext(), "Long press no: " + numberOfPresses, Toast.LENGTH_SHORT);
                 numberOfPresses++;
                 if (numberOfPresses == 3) {
                     GetLocations getLocations = new GetLocations(mMap, "any");
                     getLocations.execute();
                 }
-                return false;
+                return true;
             }
         });
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
