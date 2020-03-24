@@ -16,14 +16,16 @@ class DataPackager {
     private String longitude;
     private String height;
     private String speed;
+    private String accuracy;
     private String TAG = "DataPacker";
 
-    DataPackager(String device, String latitude, String longitude, String height, String speed){
+    DataPackager(String device, String latitude, String longitude, String height, String speed, String accuracy){
         this.device = device;
         this.latitude = latitude;
         this.longitude = longitude;
         this.height = height;
         this.speed = speed;
+        this.accuracy = accuracy;
     }
 
     private String getDeviceName() {
@@ -59,6 +61,7 @@ class DataPackager {
             jsonObject.put("Longitude", longitude);
             jsonObject.put("Height", height);
             jsonObject.put("Speed", speed);
+            jsonObject.put("Accuracy", accuracy);
 
             Boolean firstValue = true;
             Iterator iterator = jsonObject.keys();

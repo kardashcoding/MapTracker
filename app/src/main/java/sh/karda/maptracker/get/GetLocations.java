@@ -1,13 +1,16 @@
 package sh.karda.maptracker.get;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -73,12 +76,26 @@ public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     @Override
     protected void onPostExecute(PositionPoints points){
         super.onPostExecute(points);
-        if (points == null || points.items == null || points.items.size() == 0) return;
 
+        if (points == null || points.items == null || points.items.size() == 0) return;
+        PolylineOptions options = new PolylineOptions();
+        options.color(Color.BLUE)
+                .width(5)
+                .visible(true);
+        Point prev = null;
         for (Point item: points.items) {
             LatLng myLocation = new LatLng(item.latitude, item.longitude);
             Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
-            map.addMarker(new MarkerOptions().position(myLocation).title(item.date));
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(myLocation)
+                    .title(item.getTitle());
+            map.addMarker(markerOptions);
+
+            if (prev != null) {
+                // options.add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude));
+            }
+            prev = item;
+            map.addPolyline(options);
         }
         LatLngBounds myArea = new LatLngBounds(new LatLng(points.getMinLatitude(), points.getMinLongitude()), new LatLng(points.getMaxLatitude(), points.getMaxLongitude()));
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(myArea, 200));

@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 public class Sender extends AsyncTask<Void, Void, String> {
     private static final String TAG = "Sender";
     private String urlAddress;
-    private String device, latitude, longitude, height, speed;
+    private String device, latitude, longitude, height, speed, accuracy;
 
     public Sender(String urlAddress, String... values){
         this.urlAddress = urlAddress;
@@ -23,6 +23,7 @@ public class Sender extends AsyncTask<Void, Void, String> {
         this.longitude = values[2];
         this.height = values[3];
         this.speed = values[4];
+        this.accuracy = values[5];
     }
 
     @Override
@@ -45,7 +46,7 @@ public class Sender extends AsyncTask<Void, Void, String> {
     }
 
     private String send(){
-        String arguments = new DataPackager(device, latitude, longitude, height, speed).packData();
+        String arguments = new DataPackager(device, latitude, longitude, height, speed, accuracy).packData();
 
         HttpURLConnection conn = Connector.connect(urlAddress+"&"+arguments);
         if (conn == null) return null;

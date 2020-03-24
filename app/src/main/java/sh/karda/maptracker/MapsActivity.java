@@ -2,13 +2,19 @@ package sh.karda.maptracker;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -36,6 +42,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
     MarkerOptions mo;
     int numberOfPresses = 0;
+    private Location mLastLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,16 +94,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.show();
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -112,19 +109,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-
-        String latitude, longitude, height, speed;
+        if (isNetworkAvailable(getApplicationContext())) return;
+        String latitude, longitude, height, accuracy;
         LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
         mMap.addMarker(new MarkerOptions().position(myLocation).title("My location"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
         latitude = String.valueOf(myLocation.latitude);
         longitude = String.valueOf(myLocation.longitude);
         height = String.valueOf(location.getAltitude());
-        speed  = String.valueOf(location.getSpeed());
+        accuracy = String.valueOf(location.getAccuracy());
 
-        Sender sender = new Sender(url, getDeviceId(), latitude, longitude, height, speed);
+        Sender sender = new Sender(url, getDeviceId(), latitude, longitude, height, LocationHelper.getSpeed(location), accuracy);
         sender.execute();
     }
+
+
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -157,11 +156,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 1000, 0, this);
+        locationManager.requestLocationUpdates(provider, 1000, 100, this);
     }
 
     private boolean isLocationEnabled(){
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        if(context == null)  return false;
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    return true;
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    return true;
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
