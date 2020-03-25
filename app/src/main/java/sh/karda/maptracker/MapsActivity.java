@@ -66,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                Toast.makeText(getApplicationContext(), "Long press no: " + numberOfPresses, Toast.LENGTH_SHORT);
+                Toast.makeText(getApplicationContext(), "Long press no: " + numberOfPresses, Toast.LENGTH_SHORT).show();
                 numberOfPresses++;
                 if (numberOfPresses == 3) {
                     GetLocations getLocations = new GetLocations(mMap, "any");
@@ -83,6 +83,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }else {
             showAlert();
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId());
+        getLocations.execute();
+        Toast.makeText(getApplicationContext(), "Locations loaded: " + numberOfPresses, Toast.LENGTH_SHORT).show();
     }
 
     private void showAlert() {

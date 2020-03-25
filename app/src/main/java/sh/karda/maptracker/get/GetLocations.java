@@ -77,7 +77,8 @@ public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     protected void onPostExecute(PositionPoints points){
         super.onPostExecute(points);
 
-        if (points == null || points.items == null || points.items.size() == 0) return;
+        if (points == null || points.items == null || points.items.size() < 3) return;
+        map.clear();
         PolylineOptions options = new PolylineOptions();
         options.color(Color.BLUE)
                 .width(5)
