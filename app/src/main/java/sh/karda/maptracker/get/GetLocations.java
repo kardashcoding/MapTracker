@@ -6,12 +6,12 @@ import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
+
+import sh.karda.maptracker.dto.Point;
 
 public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     private GoogleMap map;
@@ -63,7 +66,10 @@ public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     protected PositionPoints doInBackground(Void... voids) {
         try {
             JSONObject json = getJSONObjectFromURL();
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
+            //GsonBuilder gsonBuilder = gson.newBuilder();
+            //gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
 
             String s = json.toString();
             dataItems = gson.fromJson(s, PositionPoints.class);

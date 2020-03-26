@@ -10,28 +10,26 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.room.Room;
+import sh.karda.maptracker.database.AppDatabase;
+import sh.karda.maptracker.database.DatabaseHelper;
 import sh.karda.maptracker.get.GetLocations;
-import sh.karda.maptracker.put.Sender;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
     final String TAG = "MapsActivity";
@@ -43,6 +41,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     MarkerOptions mo;
     int numberOfPresses = 0;
     private Location mLastLocation;
+    AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +82,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }else {
             showAlert();
         }
+
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
+                .build();
+
     }
 
     @Override
@@ -90,7 +93,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStart();
         GetLocations getLocations = new GetLocations(mMap, getDeviceId());
         getLocations.execute();
-        Toast.makeText(getApplicationContext(), "Locations loaded: " + numberOfPresses, Toast.LENGTH_SHORT).show();
     }
 
     private void showAlert() {
@@ -117,18 +119,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-        if (isNetworkAvailable(getApplicationContext())) return;
-        String latitude, longitude, height, accuracy;
-        LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(myLocation).title("My location"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
-        latitude = String.valueOf(myLocation.latitude);
-        longitude = String.valueOf(myLocation.longitude);
-        height = String.valueOf(location.getAltitude());
-        accuracy = String.valueOf(location.getAccuracy());
+        // if (isNetworkAvailable(getApplicationContext()) && !isUSBCharging()) return;
 
-        Sender sender = new Sender(url, getDeviceId(), latitude, longitude, height, LocationHelper.getSpeed(location), accuracy);
-        sender.execute();
+        DatabaseHelper threadHelper = new DatabaseHelper(db, location, getDeviceId());
+        threadHelper.execute();
     }
 
 
@@ -164,12 +158,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 1000, 100, this);
+        locationManager.requestLocationUpdates(provider, 1000, 1, this);
     }
 
     private boolean isLocationEnabled(){
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    public boolean isUSBCharging(){
+        BatteryManager myBatteryManager = (BatteryManager) getApplicationContext().getSystemService(Context.BATTERY_SERVICE);
+        return  myBatteryManager.isCharging();
     }
 
     public static boolean isNetworkAvailable(Context context) {
