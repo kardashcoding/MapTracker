@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import androidx.room.Room;
+
 
 public class DatabaseHelper extends AsyncTask<Void, Void, String> {
 
@@ -15,12 +17,16 @@ public class DatabaseHelper extends AsyncTask<Void, Void, String> {
     private Location location;
     private String deviceId;
     private Location mLastLocation;
+    private boolean gotNetwork;
+    private String wifiName;
 
 
-    public DatabaseHelper(AppDatabase db, Location location, String deviceId) {
+    public DatabaseHelper(AppDatabase db, Location location, String deviceId, boolean networkAvailable, String wifiName) {
         this.db = db;
         this.location = location;
         this.deviceId = deviceId;
+        this.gotNetwork = networkAvailable;
+        this.wifiName = wifiName;
     }
 
     @Override
@@ -29,10 +35,12 @@ public class DatabaseHelper extends AsyncTask<Void, Void, String> {
         return null;
     }
 
-    static PositionRow locationToPositionRow(Location location, String deviceId){
-        return new PositionRow(java.util.UUID.randomUUID().toString(),
+    private PositionRow locationToPositionRow(Location location, String deviceId){
+        long millis=System.currentTimeMillis();
+        PositionRow p = new PositionRow(java.util.UUID.randomUUID().toString(),
                 deviceId, location.getLongitude(), location.getLatitude(), location.getAccuracy(),
-                location.getAltitude(), location.getSpeed(), Iso8603DateFormat());
+                location.getAltitude(), location.getSpeed(), new java.sql.Date(millis), wifiName, gotNetwork);
+        return p;
     }
 
     static String Iso8603DateFormat(){
@@ -40,6 +48,5 @@ public class DatabaseHelper extends AsyncTask<Void, Void, String> {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.ENGLISH); // Quoted "Z" to indicate UTC, no timezone offset
         df.setTimeZone(tz);
         return df.format(Calendar.getInstance().getTime());
-
     }
 }

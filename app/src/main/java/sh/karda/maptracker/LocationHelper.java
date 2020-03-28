@@ -45,21 +45,4 @@ class LocationHelper {
         double d = R * c;
         return d * 1000; // meters
     }
-
-    static void storeLocation(Location location, String deviceId, AppDatabase db) {
-        db.posDao().insertRow(locationToPositionRow(location, deviceId));
-    }
-
-    static PositionRow locationToPositionRow(Location location, String deviceId){
-        return new PositionRow(java.util.UUID.randomUUID().toString(),
-                deviceId, location.getLongitude(), location.getLatitude(), location.getAccuracy(),
-                location.getAltitude(), getSpeed(location), Iso8603DateFormat());
-    }
-
-    static String Iso8603DateFormat(){
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.ENGLISH); // Quoted "Z" to indicate UTC, no timezone offset
-        df.setTimeZone(tz);
-        return df.format(Calendar.getInstance().getTime());
-    }
 }

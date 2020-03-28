@@ -5,15 +5,16 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.dto.Positions;
 
 public class Sender extends AsyncTask<Void, Void, String> {
     private final static String urlStr = "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==";
     private static final String TAG = "Sender";
-    private Positions positions;
+    private AppDatabase db;
 
-    public Sender(Positions positions){
-        this.positions = positions;
+    public Sender(AppDatabase db){
+        this.db = db;
     }
 
     @Override
@@ -24,7 +25,9 @@ public class Sender extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void...params){
         try {
-            return PutRequest.send(urlStr, positions);
+            Log.v(TAG, "Shit kom hit 1");                    Log.v(TAG, "Shit kom hit 1");
+
+            return PutRequest.send(urlStr, db);
         } catch (IOException e) {
             e.printStackTrace();
         }

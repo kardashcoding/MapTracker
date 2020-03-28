@@ -3,4 +3,8 @@
     <string name="title_activity_maps">Map</string>
     <string name="button_load">Get Locations</string>
     <string name="url">https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==</string>
+    <string name="time_string">14:00:15</string>
+    <string name="wifi_string">wifi</string>
+    <string name="latitude_string">60</string>
+    <string name="accuracy_string">205</string>
 </resources>

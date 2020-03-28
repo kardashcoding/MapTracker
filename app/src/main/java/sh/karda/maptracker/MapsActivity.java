@@ -3,6 +3,8 @@ package sh.karda.maptracker;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -10,9 +12,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -24,12 +29,26 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
+import sh.karda.maptracker.database.DbActivity;
+import sh.karda.maptracker.database.PositionRow;
 import sh.karda.maptracker.get.GetLocations;
+import sh.karda.maptracker.put.Sender;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
     final String TAG = "MapsActivity";
@@ -42,6 +61,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int numberOfPresses = 0;
     private Location mLastLocation;
     AppDatabase db;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+    GotWifiReceiver g;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 numberOfPresses++;
-                GetLocations getLocations = new GetLocations(mMap, getDeviceId());
-                getLocations.execute();
+                Intent dbIntent = new Intent(getBaseContext(), DbActivity.class);
+                startActivity(dbIntent);
             }
         });
         loadButton.setOnLongClickListener(new View.OnLongClickListener() {
@@ -70,6 +93,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (numberOfPresses == 3) {
                     GetLocations getLocations = new GetLocations(mMap, "any");
                     getLocations.execute();
+                }else{
+                    Log.v(TAG, "Shit kom hit 1");
+
+                    Sender s = new Sender(db);
+                    s.execute();
                 }
                 return true;
             }
@@ -84,8 +112,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
+                .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
                 .build();
-
+        IntentFilter intentFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        g = new GotWifiReceiver();
+        // registerReceiver(g, intentFilter);
     }
 
     @Override
@@ -93,6 +125,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStart();
         GetLocations getLocations = new GetLocations(mMap, getDeviceId());
         getLocations.execute();
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        unregisterReceiver(g);
     }
 
     private void showAlert() {
@@ -121,7 +159,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLocationChanged(Location location) {
         // if (isNetworkAvailable(getApplicationContext()) && !isUSBCharging()) return;
 
-        DatabaseHelper threadHelper = new DatabaseHelper(db, location, getDeviceId());
+        DatabaseHelper threadHelper = new DatabaseHelper(db, location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName());
         threadHelper.execute();
     }
 
@@ -169,6 +207,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean isUSBCharging(){
         BatteryManager myBatteryManager = (BatteryManager) getApplicationContext().getSystemService(Context.BATTERY_SERVICE);
         return  myBatteryManager.isCharging();
+    }
+
+    public String wifiName(){
+        WifiManager wifiManager = (WifiManager) getSystemService (Context.WIFI_SERVICE);
+        WifiInfo info = null;
+        if (wifiManager == null) return "";
+        info = wifiManager.getConnectionInfo ();
+        return info.getSSID();
     }
 
     public static boolean isNetworkAvailable(Context context) {
