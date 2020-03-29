@@ -24,4 +24,7 @@ public interface PositionDao {
 
     @Query("UPDATE PositionRow SET sent = :s")
     void setRowsAsSent(boolean s);
+
+    @Query("UPDATE PositionRow SET guid = guid+id")
+    void messUpGuid();
 }

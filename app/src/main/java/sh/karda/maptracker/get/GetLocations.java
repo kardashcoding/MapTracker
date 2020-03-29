@@ -12,7 +12,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -23,12 +25,13 @@ import java.net.URL;
 import java.util.Date;
 
 import sh.karda.maptracker.dto.Point;
+import sh.karda.maptracker.dto.Positions;
 
-public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
+public class GetLocations extends AsyncTask<Void, Void, Positions> {
     private GoogleMap map;
     private String deviceId;
     private String TAG = "GetLocations";
-    private PositionPoints dataItems;
+    private Positions dataItems;
     public GetLocations(GoogleMap map, String device){
         this.map = map;
         this.deviceId = device;
@@ -63,39 +66,55 @@ public class GetLocations extends AsyncTask<Void, Void, PositionPoints> {
     }
 
     @Override
-    protected PositionPoints doInBackground(Void... voids) {
+    protected Positions doInBackground(Void... voids) {
+        Positions points = new Positions();
+
         try {
             JSONObject json = getJSONObjectFromURL();
-            Gson gson = new GsonBuilder()
-                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").create();
+            //Gson gson = new GsonBuilder()
+            //        .registerTypeAdapter(Date.class, new DateDeserializer()).create();
             //GsonBuilder gsonBuilder = gson.newBuilder();
             //gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
 
-            String s = json.toString();
-            dataItems = gson.fromJson(s, PositionPoints.class);
+            Gson gson = new Gson();
+            JSONArray arr = json.getJSONArray("points");
+
+            for (int i = 0; i < arr.length(); i++) {
+                String line = arr.getJSONObject(i).toString();
+                Point p = gson.fromJson(line, Point.class);
+                if (p == null){
+                    Log.v(TAG, "FAEN!");
+                    Log.v(TAG, line);
+
+                }else{
+                    points.points.add(p);
+                }
+            }
+            dataItems = points;
+            Log.v(TAG, "antall" + points.points.size());
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
-        return dataItems;
+        return points;
     }
 
     @Override
-    protected void onPostExecute(PositionPoints points){
+    protected void onPostExecute(Positions points){
         super.onPostExecute(points);
 
-        if (points == null || points.items == null || points.items.size() < 3) return;
+        if (points == null || points.points == null || points.points.size() < 3) return;
         map.clear();
         PolylineOptions options = new PolylineOptions();
         options.color(Color.BLUE)
                 .width(5)
                 .visible(true);
         Point prev = null;
-        for (Point item: points.items) {
+        for (Point item: points.points) {
             LatLng myLocation = new LatLng(item.latitude, item.longitude);
             Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(myLocation)
-                    .title(item.getTitle());
+                    .title(item.date);
             map.addMarker(markerOptions);
 
             if (prev != null) {

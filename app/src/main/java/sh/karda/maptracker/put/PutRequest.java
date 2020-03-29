@@ -49,8 +49,10 @@ public class PutRequest {
         OutputStreamWriter writer = new OutputStreamWriter(uc.getOutputStream(), StandardCharsets.UTF_8);
         writer.write(jsonString);
         writer.close();
+        BufferedReader br = null;
+
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+            br = new BufferedReader(new InputStreamReader(uc.getInputStream()));
             while((line = br.readLine()) != null){
                 stringBuffer.append(line);
             }
@@ -58,9 +60,11 @@ public class PutRequest {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        Log.v(TAG, uc.getResponseMessage());
         if (uc.getResponseCode() == 200){
             db.posDao().setRowsAsSent(true);
-            Log.v(TAG, "Shit sendte " + itemsSent);
+            Log.v(TAG, "Shit sendte: " + itemsSent);
+            Log.v(TAG, "Resultatet var: " + br);
         }
         uc.disconnect();
         return jsonString;

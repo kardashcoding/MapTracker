@@ -7,4 +7,6 @@
     <string name="wifi_string">wifi</string>
     <string name="latitude_string">60</string>
     <string name="accuracy_string">205</string>
+    <string name="send_to_cloud">Send to Cloud</string>
+    <string name="reset">Reset</string>
 </resources>

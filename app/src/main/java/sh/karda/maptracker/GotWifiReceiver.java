@@ -13,16 +13,14 @@ public class GotWifiReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-
-        if(action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)){
-            if (!wifiName(context).equals("")){
-                AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, "production")
-                        .allowMainThreadQueries()
-                        .fallbackToDestructiveMigration()
-                        .build();
-                Sender sender = new Sender(db);
-                sender.execute();
-            }
+        String ssid = wifiName(context);
+        if (!ssid.equals("") && !ssid.equals("<unknown ssid>")){
+            AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, "production")
+                    .allowMainThreadQueries()
+                    .fallbackToDestructiveMigration()
+                    .build();
+            Sender sender = new Sender(db);
+            sender.execute();
         }
     }
 

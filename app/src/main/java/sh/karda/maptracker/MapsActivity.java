@@ -85,6 +85,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(dbIntent);
             }
         });
+        Button sendToCloud = findViewById(R.id.button_send);
+        sendToCloud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Sender s = new Sender(db);
+                s.execute();
+            }
+        });
+
+        Button resetButton = findViewById(R.id.button_reset);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                db.posDao().setRowsAsSent(false);
+                db.posDao().messUpGuid();
+            }
+        });
         loadButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -117,7 +134,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
         IntentFilter intentFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
         g = new GotWifiReceiver();
-        // registerReceiver(g, intentFilter);
+        registerReceiver(g, intentFilter);
     }
 
     @Override
@@ -128,8 +145,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onStop(){
-        super.onStop();
+    public void onDestroy(){
+        super.onDestroy();
         unregisterReceiver(g);
     }
 
@@ -196,7 +213,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 1000, 1, this);
+        locationManager.requestLocationUpdates(provider, 10, 1, this);
     }
 
     private boolean isLocationEnabled(){

@@ -13,35 +13,37 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/wifi"
-                android:layout_width="150sp"
-                android:layout_height="wrap_content"
-                android:text="@string/wifi_string"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="100sp"
-                android:layout_height="wrap_content"
-                android:text="@string/time_string"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/time"
-                android:layout_width="100sp"
+                android:layout_width="70sp"
                 android:layout_height="wrap_content"
                 android:text="@string/time_string"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="110sp"
+                android:layout_height="wrap_content"
+                android:text="@string/time_string"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/wifi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wifi_string"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="20sp"
+            android:textStyle="bold" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -49,7 +51,7 @@
 
             <TextView
                 android:id="@+id/latitude"
-                android:layout_width="60sp"
+                android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:text="@string/accuracy_string"
                 android:textColor="@android:color/secondary_text_dark"
@@ -57,36 +59,42 @@
 
             <TextView
                 android:id="@+id/longitude"
-                android:layout_width="60sp"
+                android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:text="@string/accuracy_string"
                 android:textColor="@android:color/secondary_text_dark"
                 android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/accuracy"
-                android:layout_width="60sp"
-                android:layout_height="wrap_content"
-                android:text="@string/latitude_string"
-                android:textColor="@android:color/secondary_text_dark"
-                android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/speed"
-                android:layout_width="60sp"
-                android:layout_height="wrap_content"
-                android:text="@string/latitude_string"
-                android:textColor="@android:color/secondary_text_dark"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/height"
-                android:layout_width="60sp"
-                android:layout_height="wrap_content"
-                android:text="@string/latitude_string"
-                android:textColor="@android:color/secondary_text_dark"
-                android:textSize="16sp" />
         </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/accuracy"
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:text="@string/latitude_string"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/speed"
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:text="@string/latitude_string"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/height"
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:text="@string/latitude_string"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="16sp" />
+    </LinearLayout>
     </LinearLayout>
 
 

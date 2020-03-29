@@ -9,12 +9,13 @@ import java.util.Locale;
 import java.util.TimeZone;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.PositionRow;
+import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
 import sh.karda.maptracker.put.Sender;
 
 class LocationHelper {
     private static Location mLastLocation;
-    private static Positions positions = new Positions();
+    //private static Positions positions = new Positions(new Point[]);
     static float getSpeed(Location pCurrentLocation) {
         double speed = 0;
         if (mLastLocation != null){

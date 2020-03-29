@@ -25,8 +25,7 @@ public class Sender extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void...params){
         try {
-            Log.v(TAG, "Shit kom hit 1");                    Log.v(TAG, "Shit kom hit 1");
-
+            Log.v(TAG, "Shit kom hit 1");
             return PutRequest.send(urlStr, db);
         } catch (IOException e) {
             e.printStackTrace();
