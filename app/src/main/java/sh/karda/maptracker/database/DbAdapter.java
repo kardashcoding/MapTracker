@@ -1,6 +1,7 @@
 package sh.karda.maptracker.database;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,8 +62,8 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
             viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.row_item, parent, false);
-            viewHolder.txtWifi = convertView.findViewById(R.id.time);
-            viewHolder.txtTime = convertView.findViewById(R.id.wifi);
+            viewHolder.txtWifi = convertView.findViewById(R.id.wifi);
+            viewHolder.txtTime = convertView.findViewById(R.id.time);
             viewHolder.txtDate = convertView.findViewById(R.id.date);
             viewHolder.txtLatitude = convertView.findViewById(R.id.latitude);
             viewHolder.txtLongitude = convertView.findViewById(R.id.longitude);
@@ -90,6 +91,16 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
         viewHolder.txtAccuracy.setText(getValue(positionRow.getAccuracy()));
         viewHolder.txtSpeed.setText(getValue(positionRow.getSpeed()));
         viewHolder.txtHeight.setText(getValue(positionRow.getHeight()));
+        if (positionRow.sent){
+            viewHolder.txtWifi.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtTime.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtDate.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtLatitude.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtLongitude.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtAccuracy.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtSpeed.setTextColor(Color.parseColor("#7f9bc9"));
+            viewHolder.txtHeight.setTextColor(Color.parseColor("#7f9bc9"));
+        }
 
         return convertView;
     }

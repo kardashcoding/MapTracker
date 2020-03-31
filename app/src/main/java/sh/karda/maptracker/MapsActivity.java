@@ -20,33 +20,25 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
 import sh.karda.maptracker.database.DbActivity;
-import sh.karda.maptracker.database.PositionRow;
 import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.put.Sender;
 
@@ -65,6 +57,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     GotWifiReceiver g;
+    ImageButton loadButton;
+    Button sendToCloud;
+    Button resetButton;
+    ImageButton loadFromCloud;
+    Switch displayLinesSwitch;
+    boolean displayLines;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,52 +74,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+        registerButtons();
 
-        Button loadButton = findViewById(R.id.button_load);
-        loadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                numberOfPresses++;
-                Intent dbIntent = new Intent(getBaseContext(), DbActivity.class);
-                startActivity(dbIntent);
-            }
-        });
-        Button sendToCloud = findViewById(R.id.button_send);
-        sendToCloud.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Sender s = new Sender(db);
-                s.execute();
-            }
-        });
-
-        Button resetButton = findViewById(R.id.button_reset);
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                db.posDao().setRowsAsSent(false);
-                db.posDao().messUpGuid();
-            }
-        });
-        loadButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Toast.makeText(getApplicationContext(), "Long press no: " + numberOfPresses, Toast.LENGTH_SHORT).show();
-                numberOfPresses++;
-                if (numberOfPresses == 3) {
-                    GetLocations getLocations = new GetLocations(mMap, "any");
-                    getLocations.execute();
-                }else{
-                    Log.v(TAG, "Shit kom hit 1");
-
-                    Sender s = new Sender(db);
-                    s.execute();
-                }
-                return true;
-            }
-        });
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        mo = new MarkerOptions().position(new LatLng(10, 60)).title("My position");
         requestPermissions(PERMISSIONS, PERMISSION_ALL);
         if (isLocationEnabled()){
             requestLocation();
@@ -140,7 +96,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStart() {
         super.onStart();
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId());
+        if (mMap == null) return;;
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
         getLocations.execute();
     }
 
@@ -213,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 10, 1, this);
+        locationManager.requestLocationUpdates(provider, 1000, 10, this);
     }
 
     private boolean isLocationEnabled(){
@@ -251,5 +208,73 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         return false;
+    }
+
+    private void registerButtons(){
+        loadButton = findViewById(R.id.button_db);
+        loadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                numberOfPresses++;
+                Intent dbIntent = new Intent(getBaseContext(), DbActivity.class);
+                startActivity(dbIntent);
+            }
+        });
+        sendToCloud = findViewById(R.id.button_send);
+        sendToCloud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Sender s = new Sender(db);
+                s.execute();
+            }
+        });
+
+        loadFromCloud = findViewById(R.id.button_load_from_cloud);
+        loadFromCloud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
+                getLocations.execute();
+
+            }
+        });
+
+        resetButton = findViewById(R.id.button_reset);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                db.posDao().setRowsAsSent(false);
+                db.posDao().messUpGuid();
+            }
+        });
+        loadButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Toast.makeText(getApplicationContext(), "Long press no: " + numberOfPresses, Toast.LENGTH_SHORT).show();
+                numberOfPresses++;
+                if (numberOfPresses == 3) {
+                    GetLocations getLocations = new GetLocations(mMap, "any", displayLines);
+                    getLocations.execute();
+                }else{
+                    Log.v(TAG, "Shit kom hit 1");
+
+                    Sender s = new Sender(db);
+                    s.execute();
+                }
+                return true;
+            }
+        });
+
+        displayLinesSwitch = findViewById(R.id.switch_lines);
+        displayLinesSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                displayLines = isChecked;
+                GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
+                getLocations.execute();
+            }
+        });
+
+
     }
 }

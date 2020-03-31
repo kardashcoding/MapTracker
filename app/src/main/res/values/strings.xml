@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">MapTracker</string>
     <string name="title_activity_maps">Map</string>
-    <string name="button_load">Get Locations</string>
+    <string name="button_load_db">Get DB</string>
+    <string name="button_load_cloud">Get Pos</string>
     <string name="url">https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==</string>
     <string name="time_string">14:00:15</string>
     <string name="wifi_string">wifi</string>
@@ -9,4 +10,10 @@
     <string name="accuracy_string">205</string>
     <string name="send_to_cloud">Send to Cloud</string>
     <string name="reset">Reset</string>
+    <string name="string_date">23-09-2020</string>
+    <string name="accuracy_title">a:</string>
+    <string name="speed_title">s:</string>
+    <string name="height_title">h:</string>
+    <string name="content_description_db">DB</string>
+    <string name="content_description_get_from_cloud">Get From Cloud</string>
 </resources>

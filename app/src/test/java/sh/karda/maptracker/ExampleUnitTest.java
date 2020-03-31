@@ -1,23 +1,13 @@
 package sh.karda.maptracker;
 
-import android.location.Location;
-import android.util.Log;
-
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.junit.Test;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.Calendar;
-
-import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
-import sh.karda.maptracker.get.PositionPoints;
-import sh.karda.maptracker.put.PutRequest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

@@ -27,4 +27,7 @@ public interface PositionDao {
 
     @Query("UPDATE PositionRow SET guid = guid+id")
     void messUpGuid();
+
+    @Query("SELECT COUNT(*) FROM PositionRow WHERE sent = 0")
+    int unsentRows();
 }

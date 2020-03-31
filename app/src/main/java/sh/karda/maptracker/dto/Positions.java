@@ -9,10 +9,6 @@ public class Positions {
         points = new ArrayList<>();
     }
 
-    public Positions(ArrayList<Point> points) {
-        this.points = points;
-    }
-
     public double getMinLatitude(){
         double minValue = 1000;
         for (Point item : points) {

@@ -15,12 +15,37 @@
         <LinearLayout android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <Button
-                android:id="@+id/button_load"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#74FAFAFA"
-                android:text="@string/button_load" />
+                android:orientation="horizontal">
+                <ImageButton
+                    android:id="@+id/button_db"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#74FAFAFA"
+                    android:src="@drawable/ic_action_db"
+                    android:layout_margin="10dp"
+                    android:contentDescription="@string/content_description_db" />
+                <Switch
+                    android:id="@+id/switch_lines"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp" />
+
+                <ImageButton
+                    android:id="@+id/button_load_from_cloud"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="#74FAFAFA"
+                    android:src="@drawable/ic_action_refresh"
+                    android:layout_margin="10dp"
+                    android:contentDescription="@string/content_description_get_from_cloud" />
+            </LinearLayout>
+
+
 
             <Button
                 android:id="@+id/button_send"

@@ -1,9 +1,5 @@
 package sh.karda.maptracker.dto;
 
-
-import java.util.Date;
-import java.time.Instant;
-
 public class Point {
     public Point(float accuracy, boolean connected_to_wifi, String date, String device, String guid, double height, int id, double latitude, double longitude, float speed, String wifi) {
         this.accuracy = accuracy;
@@ -31,4 +27,32 @@ public class Point {
     public float speed;
     public String wifi;
 
+    public int getSpeed(){
+        return (int) speed;
+    }
+
+    public int getAccuracy(){
+        return (int) accuracy;
+    }
+
+    public int getHeight(){
+        return (int) height;
+    }
+
+    public String getTime(){
+        if (date == null) return "";
+        String[] split = date.split("T");
+        if (split.length != 2) return date;
+        String time = split[1];
+        String r = time.split("\\.")[0];
+        return r;
+    }
+
+    public String getTitle(){
+        return getTime() + System.lineSeparator() +
+                "Speed: " + getSpeed()  + System.lineSeparator() +
+                "Accuracy: " + getAccuracy()  + System.lineSeparator() +
+                "Height: " + getHeight()  + System.lineSeparator() + wifi;
+
+    }
 }

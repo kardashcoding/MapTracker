@@ -6,9 +6,11 @@ import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,9 +34,11 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
     private String deviceId;
     private String TAG = "GetLocations";
     private Positions dataItems;
-    public GetLocations(GoogleMap map, String device){
+    private boolean drawLines;
+    public GetLocations(GoogleMap map, String device, boolean drawlines){
         this.map = map;
         this.deviceId = device;
+        this.drawLines = drawlines;
     }
 
     private JSONObject getJSONObjectFromURL() throws IOException, JSONException {
@@ -71,11 +75,6 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
 
         try {
             JSONObject json = getJSONObjectFromURL();
-            //Gson gson = new GsonBuilder()
-            //        .registerTypeAdapter(Date.class, new DateDeserializer()).create();
-            //GsonBuilder gsonBuilder = gson.newBuilder();
-            //gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
-
             Gson gson = new Gson();
             JSONArray arr = json.getJSONArray("points");
 
@@ -102,26 +101,33 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
     protected void onPostExecute(Positions points){
         super.onPostExecute(points);
 
+        if (map == null) return;
         if (points == null || points.points == null || points.points.size() < 3) return;
         map.clear();
         PolylineOptions options = new PolylineOptions();
-        options.color(Color.BLUE)
-                .width(5)
-                .visible(true);
+
         Point prev = null;
         for (Point item: points.points) {
             LatLng myLocation = new LatLng(item.latitude, item.longitude);
             Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(myLocation)
-                    .title(item.date);
+                    .title(item.getTitle());
+            if (item.getAccuracy() < 20) markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            if (item.getHeight() > 10) markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+            if (item.getSpeed() > 0) markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
             map.addMarker(markerOptions);
 
-            if (prev != null) {
-                // options.add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude));
+            if (prev != null && drawLines){
+                map.addPolyline(new PolylineOptions()
+                        .add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude))
+                        .width(5)
+                        .color(Color.BLUE));
             }
             prev = item;
-            map.addPolyline(options);
         }
         LatLngBounds myArea = new LatLngBounds(new LatLng(points.getMinLatitude(), points.getMinLongitude()), new LatLng(points.getMaxLatitude(), points.getMaxLongitude()));
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(myArea, 200));
