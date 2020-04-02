@@ -1,6 +1,7 @@
 package sh.karda.maptracker.database;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import androidx.room.Dao;
@@ -30,4 +31,7 @@ public interface PositionDao {
 
     @Query("SELECT COUNT(*) FROM PositionRow WHERE sent = 0")
     int unsentRows();
+
+    @Query("SELECT * FROM positionrow WHERE date BETWEEN :from AND :to")
+    List<PositionRow> getLastDay(long from, long to);
 }

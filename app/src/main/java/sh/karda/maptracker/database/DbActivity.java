@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class DbActivity extends AppCompatActivity {
@@ -23,8 +25,14 @@ public class DbActivity extends AppCompatActivity {
                 .allowMainThreadQueries()
                 .fallbackToDestructiveMigration()
                 .build();
-        List<PositionRow> rows = db.posDao().getAllRows();
+        List<PositionRow> rows = db.posDao().getLastDay(getDay(1), getDay(0));
         DbAdapter adapter = new DbAdapter(rows, getApplicationContext());
         listView.setAdapter(adapter);
+    }
+
+    private long getDay(int i) {
+        final Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -i);
+        return cal.getTimeInMillis();
     }
 }

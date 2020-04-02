@@ -31,21 +31,15 @@ public class DatabaseHelper extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... voids) {
         db.posDao().insertRow(locationToPositionRow(location, deviceId));
+        Sender sender = new Sender(db);
+        sender.execute();
         return null;
     }
 
     private PositionRow locationToPositionRow(Location location, String deviceId){
         long millis=System.currentTimeMillis();
-        PositionRow p = new PositionRow(java.util.UUID.randomUUID().toString(),
+        return new PositionRow(java.util.UUID.randomUUID().toString(),
                 deviceId, location.getLongitude(), location.getLatitude(), location.getAccuracy(),
                 location.getAltitude(), location.getSpeed(), new java.sql.Date(millis), wifiName, gotNetwork);
-        return p;
-    }
-
-    static String Iso8603DateFormat(){
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.ENGLISH); // Quoted "Z" to indicate UTC, no timezone offset
-        df.setTimeZone(tz);
-        return df.format(Calendar.getInstance().getTime());
     }
 }

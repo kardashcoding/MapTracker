@@ -15,21 +15,17 @@ public class Point {
         this.wifi = wifi;
     }
 
-    public float accuracy;
-    public boolean connected_to_wifi;
+    private float accuracy;
+    private boolean connected_to_wifi;
     public String date;
-    public String device;
-    public String guid;
+    private String device;
+    private String guid;
     public double height;
     public int id;
     public double latitude;
     public double longitude;
-    public float speed;
-    public String wifi;
-
-    public int getSpeed(){
-        return (int) speed;
-    }
+    private float speed;
+    private String wifi;
 
     public int getAccuracy(){
         return (int) accuracy;
@@ -44,14 +40,11 @@ public class Point {
         String[] split = date.split("T");
         if (split.length != 2) return date;
         String time = split[1];
-        String r = time.split("\\.")[0];
-        return r;
+        return time.split("\\.")[0];
     }
 
-    public String getTitle(){
-        return getTime() + System.lineSeparator() +
-                "Speed: " + getSpeed()  + System.lineSeparator() +
-                "Accuracy: " + getAccuracy()  + System.lineSeparator() +
+    public String getSnippet(){
+        return "Accuracy: " + getAccuracy()  + System.lineSeparator() +
                 "Height: " + getHeight()  + System.lineSeparator() + wifi;
 
     }

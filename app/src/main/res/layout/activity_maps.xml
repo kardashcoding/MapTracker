@@ -4,62 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MapsActivity" >
+
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MapsActivity"
-        tools:layout="@layout/activity_maps">
-
-        <LinearLayout android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <ImageButton
-                    android:id="@+id/button_db"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#74FAFAFA"
-                    android:src="@drawable/ic_action_db"
-                    android:layout_margin="10dp"
-                    android:contentDescription="@string/content_description_db" />
-                <Switch
-                    android:id="@+id/switch_lines"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp" />
-
-                <ImageButton
-                    android:id="@+id/button_load_from_cloud"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:background="#74FAFAFA"
-                    android:src="@drawable/ic_action_refresh"
-                    android:layout_margin="10dp"
-                    android:contentDescription="@string/content_description_get_from_cloud" />
-            </LinearLayout>
-
-
-
-            <Button
-                android:id="@+id/button_send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#74FAFAFA"
-                android:text="@string/send_to_cloud" />
-            <Button
-                android:id="@+id/button_reset"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#74FAFAFA"
-                android:text="@string/reset" />
-        </LinearLayout>
-
+        android:layout_gravity="bottom">
     </fragment>
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:id="@+id/fragment_buttons"
+        android:layout_gravity="top"
+        android:name="sh.karda.maptracker.ActionFragment" />
+
 </FrameLayout>

@@ -1,5 +1,6 @@
 package sh.karda.maptracker.put;
 
+import android.location.Location;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -13,15 +14,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.PositionRow;
 
-public class PutRequest {
+class PutRequest {
     private static String TAG = "PutRequest";
     private static int itemsSent;
-    public static String getJson(AppDatabase db){
+
+    private static String getJson(AppDatabase db){
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonUTCDateAdapter()).create();
 
         List<PositionRow> items = db.posDao().getAllUnsent();
@@ -31,7 +34,7 @@ public class PutRequest {
         return jsonString;
     }
 
-    public static String send(String urlStr, AppDatabase db) throws IOException {
+    static String send(String urlStr, AppDatabase db) throws IOException {
         Log.v(TAG, "Shit kom hit 1");
 
         String jsonString = getJson(db);

@@ -30,6 +30,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import androidx.core.app.ActivityCompat;
@@ -40,6 +41,7 @@ import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
 import sh.karda.maptracker.database.DbActivity;
 import sh.karda.maptracker.get.GetLocations;
+import sh.karda.maptracker.map.PopupAdapter;
 import sh.karda.maptracker.put.Sender;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
@@ -56,7 +58,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
-    GotWifiReceiver g;
     ImageButton loadButton;
     Button sendToCloud;
     Button resetButton;
@@ -74,7 +75,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
-        registerButtons();
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         requestPermissions(PERMISSIONS, PERMISSION_ALL);
@@ -85,18 +85,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
-                .allowMainThreadQueries()
-                .fallbackToDestructiveMigration()
                 .build();
-        IntentFilter intentFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        g = new GotWifiReceiver();
-        registerReceiver(g, intentFilter);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (mMap == null) return;;
+        if (mMap == null) return;
         GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
         getLocations.execute();
     }
@@ -104,7 +99,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onDestroy(){
         super.onDestroy();
-        unregisterReceiver(g);
     }
 
     private void showAlert() {
@@ -119,10 +113,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng myLocation = new LatLng(10.6173371, 59.9316922);
-        LatLngBounds myArea = new LatLngBounds(new LatLng(10.61, 59.92), new LatLng(10.62, 59.94));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+        mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
+        getLocations.execute();
     }
+
 
     private String getDeviceId(){
         return Settings.Secure.getString(getApplicationContext().getContentResolver(),
@@ -131,8 +126,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-        // if (isNetworkAvailable(getApplicationContext()) && !isUSBCharging()) return;
-
+        if (location.getAccuracy() > 500) return;
         DatabaseHelper threadHelper = new DatabaseHelper(db, location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName());
         threadHelper.execute();
     }
@@ -156,7 +150,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void requestLocation() {
         Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
         criteria.setPowerRequirement(Criteria.POWER_LOW);
         String provider = locationManager.getBestProvider(criteria, true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -170,7 +164,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 1000, 10, this);
+        locationManager.requestLocationUpdates(provider, 100, 5, this);
     }
 
     private boolean isLocationEnabled(){
@@ -178,14 +172,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-    public boolean isUSBCharging(){
-        BatteryManager myBatteryManager = (BatteryManager) getApplicationContext().getSystemService(Context.BATTERY_SERVICE);
-        return  myBatteryManager.isCharging();
-    }
-
     public String wifiName(){
         WifiManager wifiManager = (WifiManager) getSystemService (Context.WIFI_SERVICE);
-        WifiInfo info = null;
+        WifiInfo info;
         if (wifiManager == null) return "";
         info = wifiManager.getConnectionInfo ();
         return info.getSSID();
@@ -202,79 +191,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     return true;
                 } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                     return true;
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                    return true;
-                }
+                } else return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
             }
         }
         return false;
     }
 
-    private void registerButtons(){
-        loadButton = findViewById(R.id.button_db);
-        loadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                numberOfPresses++;
-                Intent dbIntent = new Intent(getBaseContext(), DbActivity.class);
-                startActivity(dbIntent);
-            }
-        });
-        sendToCloud = findViewById(R.id.button_send);
-        sendToCloud.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Sender s = new Sender(db);
-                s.execute();
-            }
-        });
 
-        loadFromCloud = findViewById(R.id.button_load_from_cloud);
-        loadFromCloud.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
-                getLocations.execute();
-
-            }
-        });
-
-        resetButton = findViewById(R.id.button_reset);
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                db.posDao().setRowsAsSent(false);
-                db.posDao().messUpGuid();
-            }
-        });
-        loadButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Toast.makeText(getApplicationContext(), "Long press no: " + numberOfPresses, Toast.LENGTH_SHORT).show();
-                numberOfPresses++;
-                if (numberOfPresses == 3) {
-                    GetLocations getLocations = new GetLocations(mMap, "any", displayLines);
-                    getLocations.execute();
-                }else{
-                    Log.v(TAG, "Shit kom hit 1");
-
-                    Sender s = new Sender(db);
-                    s.execute();
-                }
-                return true;
-            }
-        });
-
-        displayLinesSwitch = findViewById(R.id.switch_lines);
-        displayLinesSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                displayLines = isChecked;
-                GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
-                getLocations.execute();
-            }
-        });
-
-
+    public GoogleMap getMap() {
+        return mMap;
     }
 }
