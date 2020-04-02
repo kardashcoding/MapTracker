@@ -40,6 +40,7 @@ public class ActionFragment extends Fragment {
     private Button sendToCloud;
     private Button resetButton;
     private ImageButton loadFromCloud;
+    private ImageButton startSettings;
     private Switch displayLinesSwitch;
     private boolean displayLines;
 
@@ -66,6 +67,16 @@ public class ActionFragment extends Fragment {
     public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState){
         db = Room.databaseBuilder(Objects.requireNonNull(getContext()), AppDatabase.class, "production")
                 .build();
+        startSettings = getView().findViewById(R.id.button_start_settings);
+        startSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
         loadButton = Objects.requireNonNull(getView()).findViewById(R.id.button_db);
         loadButton.setOnClickListener(new View.OnClickListener() {
             @Override

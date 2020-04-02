@@ -28,6 +28,7 @@ class PutRequest {
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonUTCDateAdapter()).create();
 
         List<PositionRow> items = db.posDao().getAllUnsent();
+        if (items.size() == 0) return "";
         itemsSent = items.size();
         String jsonString = gson.toJson(items);
         Log.v(TAG, jsonString);
@@ -36,8 +37,8 @@ class PutRequest {
 
     static String send(String urlStr, AppDatabase db) throws IOException {
         Log.v(TAG, "Shit kom hit 1");
-
         String jsonString = getJson(db);
+        if (jsonString == "") return null;
         Log.v(TAG, "Shit Json: " + jsonString);
         URL url = new URL(urlStr);
         HttpURLConnection uc = (HttpURLConnection) url.openConnection();
