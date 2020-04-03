@@ -3,8 +3,7 @@ package sh.karda.maptracker;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -14,26 +13,18 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.Toast;
-import com.google.android.gms.maps.CameraUpdateFactory;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import androidx.annotation.NonNull;
@@ -43,10 +34,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
-import sh.karda.maptracker.database.DbActivity;
 import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.PopupAdapter;
-import sh.karda.maptracker.put.Sender;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
     final String TAG = "MapsActivity";
@@ -55,18 +44,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
     LocationManager locationManager;
-    MarkerOptions mo;
-    int numberOfPresses = 0;
-    private Location mLastLocation;
     AppDatabase db;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
-    ImageButton loadButton;
-    Button sendToCloud;
-    Button resetButton;
-    ImageButton loadFromCloud;
-    Switch displayLinesSwitch;
     boolean displayLines;
 
 
