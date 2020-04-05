@@ -27,9 +27,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
@@ -46,7 +50,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
     AppDatabase db;
     boolean displayLines;
-
+    PreferenceHelper preferenceHelper;
+    private static Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +61,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
+        MapsActivity.context = getApplicationContext();
         mapFragment.getMapAsync(this);
-
+        PreferenceManager.setDefaultValues(this, R.xml.root_preferences, true);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         requestPermissions(PERMISSIONS, PERMISSION_ALL);
         if (isLocationEnabled()){
@@ -130,31 +136,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.options_reset:
-                Toast.makeText(this, "Item 1", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.options_reset2:
-                Toast.makeText(this, "Item 2", Toast.LENGTH_SHORT).show();
-                return true;
 
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, R.menu.options_menu, Menu.NONE, "Tittel");
-        //MenuInflater inflater =  getMenuInflater();
-        //inflater.inflate(R.menu.options_menu, menu);
-        return true;
-    }
 
     private void requestLocation() {
         Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAccuracy(PreferenceHelper.getAccuracyFromPreferences());
         criteria.setPowerRequirement(Criteria.POWER_LOW);
         String provider = locationManager.getBestProvider(criteria, true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -168,7 +154,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 100, 5, this);
+        locationManager.requestLocationUpdates(provider, 10, 5, this);
+    }
+
+    public static Context getAppContext() {
+        return MapsActivity.context;
+    }
+
+    private int seconds(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String i = prefs.getString("signature", "10");
+        return 10;
     }
 
     private boolean isLocationEnabled(){

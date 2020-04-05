@@ -1,5 +1,8 @@
 package sh.karda.maptracker;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Criteria;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;

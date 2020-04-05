@@ -6,105 +6,109 @@
     android:layout_height="match_parent"
     tools:context=".ActionFragment">
 
-    <LinearLayout
-        android:id="@+id/linearLayoutButtons"
-        style="?android:attr/buttonBarStyle"
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:gravity="top|center_horizontal"
-        android:orientation="vertical"
+        android:scrollbarAlwaysDrawHorizontalTrack="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/linearLayoutButtons"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="3dp">
-
-            <ImageButton
-                android:id="@+id/button_db"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_margin="5dp"
-                android:src="@drawable/ic_action_db"
-                android:contentDescription="@string/content_description_db"
-                android:tooltipText="List positions" />
-
-            <ImageButton
-                android:id="@+id/button_load_from_cloud"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:src="@drawable/ic_action_refresh"
-                android:contentDescription="@string/content_description_get_from_cloud"
-                />
-
+            android:layout_marginTop="0dp"
+            android:gravity="top|center_horizontal"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_margin="20dp">
-                <Switch
-                    android:id="@+id/switch_lines"
+                android:layout_margin="3dp"
+                android:orientation="horizontal">
+
+
+                <ImageButton
+                    android:id="@+id/button_db"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|center_vertical"
-                    />
+                    android:layout_margin="5dp"
+                    android:contentDescription="@string/content_description_db"
+                    android:src="@drawable/button_table" />
 
-                <TextView
+                <ImageButton
+                    android:id="@+id/button_load_from_cloud"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/draw_lines"
-                    android:textSize="12sp" />
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:layout_margin="5dp"
+                    android:contentDescription="@string/download_from_cloud"
+                    android:src="@drawable/button_download" />
+
+                <ImageButton
+                    android:id="@+id/button_start_settings"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:layout_margin="5dp"
+                    android:contentDescription="@string/settings"
+                    android:src="@drawable/button_settings" />
+
+                <ImageButton
+                    android:id="@+id/button_reset"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:contentDescription="@string/reset"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:src="@drawable/button_reset" />
+
+                <ImageButton
+                    android:id="@+id/button_send"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:contentDescription="@string/send_to_cloud"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:src="@drawable/button_upload" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:width="100dp"
+                    android:height="20dp"
+                    android:orientation="vertical"
+                    android:textSize="12sp">
+
+                    <Switch
+                        android:id="@+id/switch_lines"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal|center_vertical"
+                        android:background="@drawable/button_background" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/draw_lines"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
             </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/button_start_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:src="@drawable/ic_option"
-                android:contentDescription="@string/content_description_settings" />
-
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="top|center_horizontal"
-            android:orientation="horizontal"
-            >
-
-            <Button
-                android:id="@+id/button_reset"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/reset"
-                android:textColor="@color/colorPrimary" />
-
-            <Button
-                android:id="@+id/button_send"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/send_to_cloud"
-                android:textColor="@color/colorPrimary" />
-        </LinearLayout>
-    </LinearLayout>
 
 
-
+    </HorizontalScrollView>
 
 
 

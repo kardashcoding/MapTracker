@@ -37,8 +37,8 @@ public class ActionFragment extends Fragment {
     private AppDatabase db;
 
     private ImageButton loadButton;
-    private Button sendToCloud;
-    private Button resetButton;
+    private ImageButton sendToCloud;
+    private ImageButton resetButton;
     private ImageButton loadFromCloud;
     private ImageButton startSettings;
     private Switch displayLinesSwitch;

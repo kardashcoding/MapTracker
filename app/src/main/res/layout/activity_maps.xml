@@ -13,11 +13,12 @@
         tools:context=".MapsActivity"
         android:layout_gravity="bottom">
     </fragment>
-    <fragment
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:id="@+id/fragment_buttons"
-        android:layout_gravity="top"
-        android:name="sh.karda.maptracker.ActionFragment" />
+
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:id="@+id/fragment_buttons"
+            android:layout_gravity="top"
+            android:name="sh.karda.maptracker.ActionFragment" />
 
 </FrameLayout>
