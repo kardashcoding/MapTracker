@@ -1,0 +1,59 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/gps_header">
+
+        <ListPreference
+            app:defaultValue="5"
+            app:entries="@array/seconds_array_entries"
+            app:entryValues="@array/seconds_array_values"
+            app:key="key_seconds"
+            app:title="@string/seconds_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="5"
+            app:entries="@array/distance_array_entries"
+            app:entryValues="@array/distance_array_values"
+            app:key="key_distance"
+            app:title="@string/distance_title"
+            android:summary="@string/distance_summary"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="ACCURACY_FINE"
+            app:entries="@array/accuracy_entries"
+            app:entryValues="@array/accuracy_values"
+            app:key="key_accuracy"
+            app:title="@string/accuracy_title2"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sync_header">
+
+        <SwitchPreferenceCompat
+            app:key="sync"
+            app:title="@string/sync_title" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:dependency="sync"
+            app:key="key_download"
+            app:summaryOff="@string/download_summary_off"
+            app:summaryOn="@string/download_summary_on"
+            app:title="@string/download_title" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Power">
+        <ListPreference
+            app:defaultValue="POWER_MEDIUM"
+            app:entries="@array/power_entries"
+            app:entryValues="@array/power_values"
+            app:key="key_power"
+            app:title="@string/power_title"
+            app:summary="@string/power_summary"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

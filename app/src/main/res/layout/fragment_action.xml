@@ -37,7 +37,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|center_vertical"
-                    android:layout_margin="5dp"
                     android:contentDescription="@string/content_description_db"
                     android:src="@drawable/button_table" />
 
@@ -47,7 +46,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|center_vertical"
-                    android:layout_margin="5dp"
                     android:contentDescription="@string/download_from_cloud"
                     android:src="@drawable/button_download" />
 
@@ -57,7 +55,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|center_vertical"
-                    android:layout_margin="5dp"
                     android:contentDescription="@string/settings"
                     android:src="@drawable/button_settings" />
 
@@ -66,7 +63,6 @@
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
                     android:contentDescription="@string/reset"
                     android:layout_gravity="center_horizontal|center_vertical"
                     android:src="@drawable/button_reset" />
@@ -76,7 +72,6 @@
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
                     android:contentDescription="@string/send_to_cloud"
                     android:layout_gravity="center_horizontal|center_vertical"
                     android:src="@drawable/button_upload" />

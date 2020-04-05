@@ -24,19 +24,24 @@
     <string name="sync_header">Sync</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
+    <string name="seconds_title">Seconds</string>
+    <string name="distance_summary">Minimum distance between logging</string>
+    <string name="distance_title">Distance</string>
     <string name="accuracy_title2">Set GPS mode</string>
+    <string name="power_title">Set power</string>
+    <string name="power_summary">Choose power plan</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    <string name="sync_title">Sync directly to cloud</string>
+    <string name="download_title">Download automatically</string>
+    <string name="download_summary_on">Automatically download positions when app opens
     </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="download_summary_off">Use "Download" button to download manually</string>
     <string name="draw_lines">Lines</string>
 
     <string name="seconds_value">10</string>
     <string name="accuracy_key">accuracy</string>
+    <string name="power_key">power</string>
     <string name="download_from_cloud">Download from cloud</string>
     <string name="location_table">Location table</string>
     <string name="settings">Settings</string>

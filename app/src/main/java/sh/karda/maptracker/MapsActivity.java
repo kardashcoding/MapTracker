@@ -15,26 +15,15 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
-import java.util.Map;
-
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
@@ -50,7 +39,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager locationManager;
     AppDatabase db;
     boolean displayLines;
-    PreferenceHelper preferenceHelper;
     private static Context context;
 
     @Override
@@ -63,8 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         assert mapFragment != null;
         MapsActivity.context = getApplicationContext();
         mapFragment.getMapAsync(this);
-        PreferenceManager.setDefaultValues(this, R.xml.root_preferences, true);
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
+        initiateLocationManager();
         requestPermissions(PERMISSIONS, PERMISSION_ALL);
         if (isLocationEnabled()){
             requestLocation();
@@ -137,11 +125,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    public void requestLocation() {
 
-    private void requestLocation() {
         Criteria criteria = new Criteria();
         criteria.setAccuracy(PreferenceHelper.getAccuracyFromPreferences());
-        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setPowerRequirement(PreferenceHelper.getPowerFromPreferences());
         String provider = locationManager.getBestProvider(criteria, true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -154,18 +142,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         assert provider != null;
-        locationManager.requestLocationUpdates(provider, 10, 5, this);
+        locationManager.requestLocationUpdates(provider, PreferenceHelper.getSecondsFromPreferences(), PreferenceHelper.getDistanceFromPreferences(), this);
     }
 
     public static Context getAppContext() {
         return MapsActivity.context;
     }
 
-    private int seconds(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String i = prefs.getString("signature", "10");
-        return 10;
-    }
 
     private boolean isLocationEnabled(){
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
@@ -201,4 +184,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public GoogleMap getMap() {
         return mMap;
     }
+
+    private void initiateLocationManager(){
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+    }
+
+    SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("key_power")) {
+                requestLocation();
+                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_power", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+            }
+            if (key.equals("key_accuracy")) {
+                requestLocation();
+                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+            }
+            if (key.equals("key_seconds")) {
+                requestLocation();
+                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+            }
+            if (key.equals("key_distance")) {
+                requestLocation();
+                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 }

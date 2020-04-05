@@ -71,7 +71,6 @@ public class ActionFragment extends Fragment {
         startSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Starter Options", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), SettingsActivity.class);
                 startActivity(intent);
             }
