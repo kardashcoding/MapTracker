@@ -40,8 +40,8 @@ public class MapHelper {
                 if (prev != null && drawLines){
                     map.addPolyline(new PolylineOptions()
                             .add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude))
-                            .width(5)
-                            .color(Color.BLUE));
+                            .width(10)
+                            .color(item.getLineColor()));
                 }
                 prev = item;
             }
@@ -49,6 +49,7 @@ public class MapHelper {
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(myArea, 200);
             map.moveCamera(cameraUpdate);
             map.animateCamera(cameraUpdate);
+
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, "Feil i Marker/Zoom delen");

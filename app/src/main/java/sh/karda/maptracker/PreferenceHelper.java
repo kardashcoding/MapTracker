@@ -50,5 +50,15 @@ class PreferenceHelper {
         }
     }
 
+    static boolean getDrawLinesFromPreferences(){
+        try {
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_lines", false);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
 

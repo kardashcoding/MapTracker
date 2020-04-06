@@ -20,5 +20,4 @@
             android:id="@+id/fragment_buttons"
             android:layout_gravity="top"
             android:name="sh.karda.maptracker.ActionFragment" />
-
 </FrameLayout>

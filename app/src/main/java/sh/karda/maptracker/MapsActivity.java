@@ -15,12 +15,11 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
@@ -38,7 +37,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     LocationManager locationManager;
     AppDatabase db;
-    boolean displayLines;
     private static Context context;
 
     @Override
@@ -68,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onStart() {
         super.onStart();
         if (mMap == null) return;
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
         getLocations.execute();
     }
 
@@ -90,10 +88,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), displayLines);
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
         getLocations.execute();
     }
-
 
     private String getDeviceId(){
         return Settings.Secure.getString(getApplicationContext().getContentResolver(),

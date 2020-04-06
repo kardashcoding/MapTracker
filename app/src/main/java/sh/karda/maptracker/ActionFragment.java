@@ -36,14 +36,6 @@ public class ActionFragment extends Fragment {
     private int numberOfPresses = 0;
     private AppDatabase db;
 
-    private ImageButton loadButton;
-    private ImageButton sendToCloud;
-    private ImageButton resetButton;
-    private ImageButton loadFromCloud;
-    private ImageButton startSettings;
-    private Switch displayLinesSwitch;
-    private boolean displayLines;
-
     public ActionFragment() {
         // Required empty public constructor
     }
@@ -51,15 +43,11 @@ public class ActionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        MapsActivity mapsActivity = (MapsActivity)getActivity();
         return inflater.inflate(R.layout.fragment_action, container, false);
     }
 
@@ -67,7 +55,7 @@ public class ActionFragment extends Fragment {
     public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState){
         db = Room.databaseBuilder(Objects.requireNonNull(getContext()), AppDatabase.class, "production")
                 .build();
-        startSettings = getView().findViewById(R.id.button_start_settings);
+        ImageButton startSettings = Objects.requireNonNull(getView()).findViewById(R.id.button_start_settings);
         startSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +65,7 @@ public class ActionFragment extends Fragment {
         });
 
 
-        loadButton = Objects.requireNonNull(getView()).findViewById(R.id.button_db);
+        ImageButton loadButton = Objects.requireNonNull(getView()).findViewById(R.id.button_db);
         loadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -86,38 +74,19 @@ public class ActionFragment extends Fragment {
                 startActivity(dbIntent);
             }
         });
-        sendToCloud = getView().findViewById(R.id.button_send);
-        sendToCloud.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Sender s = new Sender(db);
-                s.execute();
-            }
-        });
 
-        loadFromCloud = getView().findViewById(R.id.button_load_from_cloud);
+        ImageButton loadFromCloud = getView().findViewById(R.id.button_load_from_cloud);
         loadFromCloud.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MapsActivity mapsActivity = (MapsActivity)getActivity();
-                GetLocations getLocations = new GetLocations(mapsActivity.getMap(), getDeviceId(), displayLines);
+                assert mapsActivity != null;
+                GetLocations getLocations = new GetLocations(mapsActivity.getMap(), getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
                 getLocations.execute();
 
             }
         });
 
-        resetButton = getView().findViewById(R.id.button_reset);
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try{
-                    db.posDao().setRowsAsSent(false);
-                    db.posDao().messUpGuid();
-                }catch (Exception e){
-                    Log.v(TAG, e.getMessage());
-                }
-            }
-        });
         loadButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -125,7 +94,8 @@ public class ActionFragment extends Fragment {
                 numberOfPresses++;
                 if (numberOfPresses == 3) {
                     MapsActivity mapsActivity = (MapsActivity)getActivity();
-                    GetLocations getLocations = new GetLocations(mapsActivity.getMap(), "any", displayLines);
+                    assert mapsActivity != null;
+                    GetLocations getLocations = new GetLocations(mapsActivity.getMap(), "any", PreferenceHelper.getDrawLinesFromPreferences());
                     getLocations.execute();
                 }else{
                     Log.v(TAG, "Shit kom hit 1");
@@ -136,21 +106,9 @@ public class ActionFragment extends Fragment {
                 return true;
             }
         });
-
-        displayLinesSwitch = getView().findViewById(R.id.switch_lines);
-        displayLinesSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                displayLines = isChecked;
-                MapsActivity mapsActivity = (MapsActivity)getActivity();
-
-                GetLocations getLocations = new GetLocations(mapsActivity.getMap(), getDeviceId(), displayLines);
-                getLocations.execute();
-            }
-        });
     }
     private String getDeviceId(){
-        return Settings.Secure.getString(getContext().getContentResolver(),
+        return Settings.Secure.getString(Objects.requireNonNull(getContext()).getContentResolver(),
                 Settings.Secure.ANDROID_ID);
     }
 }

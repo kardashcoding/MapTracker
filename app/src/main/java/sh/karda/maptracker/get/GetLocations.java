@@ -23,12 +23,11 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
     private GoogleMap map;
     private String deviceId;
     private String TAG = "GetLocations";
-    private Positions dataItems;
     private boolean drawLines;
-    public GetLocations(GoogleMap map, String device, boolean drawlines){
+    public GetLocations(GoogleMap map, String device, boolean drawLines){
         this.map = map;
         this.deviceId = device;
-        this.drawLines = drawlines;
+        this.drawLines = drawLines;
     }
 
     private JSONObject getJSONObjectFromURL() throws IOException, JSONException {
@@ -79,7 +78,6 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
                     points.points.add(p);
                 }
             }
-            dataItems = points;
             Log.v(TAG, "antall" + points.points.size());
         } catch (IOException | JSONException e) {
             e.printStackTrace();
