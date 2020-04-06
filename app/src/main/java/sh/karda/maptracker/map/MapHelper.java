@@ -32,11 +32,9 @@ public class MapHelper {
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(myLocation)
                         .title(item.getTime())
-                        .snippet(item.getSnippet());
-                if (item.getAccuracy() < 400) markerOptions.icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                if (item.getHeight() > 10) markerOptions.icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+                        .snippet(item.getSnippet())
+                        .icon(BitmapDescriptorFactory.defaultMarker(item.getSpeedColor()));
+
                 map.addMarker(markerOptions);
 
                 if (prev != null && drawLines){

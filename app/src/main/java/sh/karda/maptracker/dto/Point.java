@@ -27,12 +27,16 @@ public class Point {
     private float speed;
     private String wifi;
 
-    public int getAccuracy(){
+    private int getAccuracy(){
         return (int) accuracy;
     }
 
     public int getHeight(){
         return (int) height;
+    }
+
+    private int getSpeed(){
+        return (int) (3.6 * speed);
     }
 
     public String getTime(){
@@ -44,8 +48,17 @@ public class Point {
     }
 
     public String getSnippet(){
-        return "Accuracy: " + getAccuracy()  + System.lineSeparator() +
+        return "Time: " + getTime()  + System.lineSeparator() +
+                "Accuracy: " + getAccuracy()  + System.lineSeparator() +
+                "Speed: " + getSpeed() + System.lineSeparator() +
                 "Height: " + getHeight()  + System.lineSeparator() + wifi;
 
+    }
+
+    public float getSpeedColor() {
+        float multipliedSpeed = speed * 50;
+        if (multipliedSpeed < 0) return 0;
+        if (multipliedSpeed > 359) return 359;
+        return multipliedSpeed;
     }
 }
