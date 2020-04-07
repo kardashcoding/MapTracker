@@ -1,3 +1,5 @@
+package sh.karda.maptracker;
+
 import android.Manifest;
 import android.app.Service;
 import android.content.Context;
@@ -14,11 +16,9 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.room.Room;
-import sh.karda.maptracker.PreferenceHelper;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
 

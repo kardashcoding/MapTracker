@@ -12,11 +12,8 @@ public class PreferenceHelper {
         String accuracy = p.getString("key_accuracy", "no value found");
         if (accuracy.equals("ACCURACY_COARSE")) return Criteria.ACCURACY_COARSE;
         if (accuracy.equals("ACCURACY_FINE")) return Criteria.ACCURACY_FINE;
-        if (accuracy.equals("ACCURACY_HIGH")) return Criteria.ACCURACY_HIGH;
-        if (accuracy.equals("ACCURACY_LOW")) return Criteria.ACCURACY_LOW;
-        if (accuracy.equals("ACCURACY_MEDIUM")) return Criteria.ACCURACY_MEDIUM;
 
-        return Criteria.ACCURACY_MEDIUM;
+        return Criteria.ACCURACY_FINE;
     }
     public static int getPowerFromPreferences() {
         SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());

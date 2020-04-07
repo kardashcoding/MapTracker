@@ -5,10 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -16,17 +12,14 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
-import sh.karda.maptracker.database.DatabaseHelper;
 import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.PopupAdapter;
 
@@ -58,7 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
                 .build();
-        serviceIntent = new Intent("sh.kardah.maptracker.LONGRUNSERVICE");
+        serviceIntent = new Intent(getAppContext(), LocationTrackerService.class);
+        serviceIntent.setAction("sh.karda.maptracker.LONGRUNSERVICE");
         startService(serviceIntent);
     }
 
@@ -73,15 +67,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onDestroy(){
         super.onDestroy();
-    }
-
-    private void showAlert() {
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setCancelable(true);
-        dialog.setTitle("Skru på lokasjon")
-        .setMessage("Du må inn i innstillinger og skru på lokasjon");
-
-        dialog.show();
     }
 
     @Override
@@ -101,38 +86,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return MapsActivity.context;
     }
 
-
-    private boolean isLocationEnabled(){
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    public String wifiName(){
-        WifiManager wifiManager = (WifiManager) getSystemService (Context.WIFI_SERVICE);
-        WifiInfo info;
-        if (wifiManager == null) return "";
-        info = wifiManager.getConnectionInfo ();
-        return info.getSSID();
-    }
-
-    public static boolean isNetworkAvailable(Context context) {
-        if(context == null)  return false;
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    return true;
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    return true;
-                } else return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
-            }
-        }
-        return false;
-    }
-
-
     public GoogleMap getMap() {
         return mMap;
     }
@@ -149,23 +102,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("key_power")) {
                 stopService(serviceIntent);
-                startService(serviceIntent);
+                startForegroundService(serviceIntent);
                 Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_power", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_accuracy")) {
                 stopService(serviceIntent);
                 startService(serviceIntent);
-                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Accuracy satt til " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_seconds")) {
                 stopService(serviceIntent);
                 startService(serviceIntent);
-                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Seconds satt til " + sharedPreferences.getString("key_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_distance")) {
                 stopService(serviceIntent);
                 startService(serviceIntent);
-                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Distance satt til " + sharedPreferences.getString("key_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
         }
     };
