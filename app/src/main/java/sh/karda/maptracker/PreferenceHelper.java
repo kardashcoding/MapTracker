@@ -5,9 +5,9 @@ import android.location.Criteria;
 
 import androidx.preference.PreferenceManager;
 
-class PreferenceHelper {
+public class PreferenceHelper {
 
-    static int getAccuracyFromPreferences() {
+    public static int getAccuracyFromPreferences() {
         SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
         String accuracy = p.getString("key_accuracy", "no value found");
         if (accuracy.equals("ACCURACY_COARSE")) return Criteria.ACCURACY_COARSE;
@@ -18,7 +18,7 @@ class PreferenceHelper {
 
         return Criteria.ACCURACY_MEDIUM;
     }
-    static int getPowerFromPreferences() {
+    public static int getPowerFromPreferences() {
         SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
         String accuracy = p.getString("key_power", "no value found");
         if (accuracy.equals("POWER_HIGH")) return Criteria.POWER_HIGH;
@@ -28,7 +28,7 @@ class PreferenceHelper {
         return Criteria.POWER_MEDIUM;
     }
 
-    static int getSecondsFromPreferences(){
+    public static int getSecondsFromPreferences(){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
             String value = p.getString("key_seconds", "5");
@@ -39,7 +39,7 @@ class PreferenceHelper {
         }
     }
 
-    static int getDistanceFromPreferences(){
+    public static int getDistanceFromPreferences(){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
             String value = p.getString("key_distance", "5");
