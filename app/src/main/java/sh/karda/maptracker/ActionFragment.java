@@ -1,5 +1,6 @@
 package sh.karda.maptracker;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ public class ActionFragment extends Fragment {
     private static final String TAG = "ActionFragment";
     private int numberOfPresses = 0;
     private AppDatabase db;
+    private ImageButton loadFromCloud;
 
     public ActionFragment() {
         // Required empty public constructor
@@ -75,7 +77,7 @@ public class ActionFragment extends Fragment {
             }
         });
 
-        ImageButton loadFromCloud = getView().findViewById(R.id.button_load_from_cloud);
+        loadFromCloud = getView().findViewById(R.id.button_load_from_cloud);
         loadFromCloud.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +109,15 @@ public class ActionFragment extends Fragment {
             }
         });
     }
+
+    @Override
+    public void onStart() {
+        if (PreferenceHelper.getDownloadAutomatically()){
+            loadFromCloud.setVisibility(View.INVISIBLE);
+        }
+        super.onStart();
+    }
+
     private String getDeviceId(){
         return Settings.Secure.getString(Objects.requireNonNull(getContext()).getContentResolver(),
                 Settings.Secure.ANDROID_ID);

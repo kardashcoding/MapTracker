@@ -32,8 +32,8 @@
     <string name="power_summary">Choose power plan</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync directly to cloud</string>
-    <string name="download_title">Download automatically</string>
+    <string name="sync_title">Sync only on wifi</string>
+    <string name="download_title">Download manually</string>
     <string name="download_summary_on">Automatically download positions when app opens
     </string>
     <string name="download_summary_off">Use "Download" button to download manually</string>
@@ -45,5 +45,8 @@
     <string name="download_from_cloud">Download from cloud</string>
     <string name="location_table">Location table</string>
     <string name="settings">Settings</string>
+    <string name="delete_all_my_positions">Delete</string>
+    <string name="key_reset_value">key_reset</string>
+    <string name="key_send_value">key_send</string>
 
 </resources>

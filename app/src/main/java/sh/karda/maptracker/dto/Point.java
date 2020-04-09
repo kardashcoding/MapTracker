@@ -14,7 +14,6 @@ public class Point {
         this.latitude = latitude;
         this.longitude = longitude;
         this.speed = speed;
-        this.wifi = wifi;
     }
 
     private float accuracy;
@@ -27,7 +26,6 @@ public class Point {
     public double latitude;
     public double longitude;
     private float speed;
-    private String wifi;
 
     private int getAccuracy(){
         return (int) accuracy;
@@ -53,8 +51,7 @@ public class Point {
         return "Time: " + getTime()  + System.lineSeparator() +
                 "Accuracy: " + getAccuracy()  + System.lineSeparator() +
                 "Speed: " + getSpeed() + System.lineSeparator() +
-                "Height: " + getHeight()  + System.lineSeparator() + wifi;
-
+                "Height: " + getHeight();
     }
 
     public float getSpeedColor() {

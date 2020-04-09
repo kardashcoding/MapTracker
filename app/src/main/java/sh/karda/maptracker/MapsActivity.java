@@ -28,6 +28,7 @@ import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DatabaseHelper;
 import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.PopupAdapter;
+import sh.karda.maptracker.put.Sender;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
     final String TAG = "MapsActivity";
@@ -50,6 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MapsActivity.context = getApplicationContext();
         mapFragment.getMapAsync(this);
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
+        SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
+
         initiateLocationManager();
         requestPermissions(PERMISSIONS, PERMISSION_ALL);
         if (isLocationEnabled()){
@@ -65,7 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStart() {
         super.onStart();
-        if (mMap == null) return;
+        if (mMap == null || !PreferenceHelper.getDownloadAutomatically()) return;
         GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
         getLocations.execute();
     }
@@ -92,8 +95,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getLocations.execute();
     }
 
-    private String getDeviceId(){
-        return Settings.Secure.getString(getApplicationContext().getContentResolver(),
+    public static String getDeviceId(){
+        return Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
     }
 
@@ -102,9 +105,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (location.getAccuracy() > 500) return;
         DatabaseHelper threadHelper = new DatabaseHelper(db, location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName());
         threadHelper.execute();
+        if (!PreferenceHelper.getSyncOnlyOnWifi()){
+            Sender sender = new Sender(db);
+            sender.execute();
+        }
     }
-
-
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {

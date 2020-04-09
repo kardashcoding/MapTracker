@@ -34,4 +34,9 @@ public interface PositionDao {
 
     @Query("SELECT * FROM positionrow WHERE date BETWEEN :from AND :to")
     List<PositionRow> getLastDay(long from, long to);
+
+    @Query("UPDATE PositionRow SET sent = 1 WHERE guid = :s")
+    void setRowsAsSent(String s);
+
+
 }

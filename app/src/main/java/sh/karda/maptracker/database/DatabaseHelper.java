@@ -31,8 +31,6 @@ public class DatabaseHelper extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... voids) {
         db.posDao().insertRow(locationToPositionRow(location, deviceId));
-        Sender sender = new Sender(db);
-        sender.execute();
         return null;
     }
 

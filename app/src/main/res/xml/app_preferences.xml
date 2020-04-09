@@ -6,7 +6,7 @@
         android:layout_height="wrap_content"
         android:title="Map">
 
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="key_lines"
             android:summary="Draw lines between markers"
@@ -38,18 +38,28 @@
             app:key="key_accuracy"
             app:title="@string/accuracy_title2"
             app:useSimpleSummaryProvider="true" />
+        <Preference
+            android:key="@string/key_reset_value"
+            android:title="Delete"
+            android:summary="Wipe out all my data"
+            />
+
+        <Preference
+            android:key="@string/key_send_value"
+            android:title="Send"
+            android:summary="Send current location now"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/sync_header">
 
         <SwitchPreferenceCompat
-            app:key="sync"
+            app:key="key_sync"
             app:title="@string/sync_title" />
 
         <SwitchPreferenceCompat
             app:defaultValue="true"
-            app:dependency="sync"
+            app:dependency="key_sync"
             app:key="key_download"
             app:summaryOff="@string/download_summary_off"
             app:summaryOn="@string/download_summary_on"
@@ -65,6 +75,13 @@
             app:title="@string/power_title"
             app:summary="@string/power_summary"
             app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Tools">
+        <SwitchPreference app:defaultValue="false"
+            android:title="Toast"
+            android:summary="Display info in toast"
+            android:key="key_toast"/>
     </PreferenceCategory>
 
 </PreferenceScreen>
