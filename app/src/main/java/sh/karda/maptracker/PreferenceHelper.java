@@ -80,7 +80,7 @@ public class PreferenceHelper {
             return false;
         }
     }
-    static boolean getDownloadAutomatically() {
+    public static boolean getDownloadAutomatically() {
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
             return p.getBoolean("key_download", false);

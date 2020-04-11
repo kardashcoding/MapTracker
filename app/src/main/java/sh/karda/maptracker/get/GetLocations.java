@@ -1,8 +1,11 @@
 package sh.karda.maptracker.get;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.gson.Gson;
 
@@ -14,7 +17,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
+import sh.karda.maptracker.R;
 import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
@@ -23,17 +29,16 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
     private GoogleMap map;
     private String deviceId;
     private String TAG = "GetLocations";
-    private boolean drawLines;
-    public GetLocations(GoogleMap map, String device, boolean drawLines){
+    private final String url = "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==";
+
+    public GetLocations(GoogleMap map, String device){
         this.map = map;
         this.deviceId = device;
-        this.drawLines = drawLines;
     }
 
     private JSONObject getJSONObjectFromURL() throws IOException, JSONException {
         HttpURLConnection urlConnection;
-        String urlString = "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==";
-        urlString = urlString + "&device=" + deviceId;
+        String urlString = url + "&device=" + deviceId;
         Log.v(TAG, "URL: " + urlString);
         URL url = new URL(urlString);
         urlConnection = (HttpURLConnection) url.openConnection();
@@ -60,6 +65,7 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
 
     @Override
     protected Positions doInBackground(Void... voids) {
+
         Positions points = new Positions();
 
         try {
@@ -88,7 +94,7 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
     @Override
     protected void onPostExecute(Positions points) {
         super.onPostExecute(points);
-        MapHelper.addToMap(map, points, drawLines);
+        MapHelper.addToMap(map, points);
     }
 
 }

@@ -2,8 +2,11 @@ package sh.karda.maptracker.dto;
 
 import android.graphics.Color;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Point {
-    public Point(float accuracy, boolean connected_to_wifi, String date, String device, String guid, double height, int id, double latitude, double longitude, float speed, String wifi) {
+    public Point(float accuracy, boolean connected_to_wifi, Date date, String device, String guid, double height, int id, double latitude, double longitude, float speed, String wifi, String deleted) {
         this.accuracy = accuracy;
         this.connected_to_wifi = connected_to_wifi;
         this.date = date;
@@ -14,11 +17,13 @@ public class Point {
         this.latitude = latitude;
         this.longitude = longitude;
         this.speed = speed;
+        this.deleted = deleted;
     }
 
     private float accuracy;
     private boolean connected_to_wifi;
-    public String date;
+    public Date date;
+    private String deleted;
     private String device;
     private String guid;
     public double height;
@@ -26,6 +31,10 @@ public class Point {
     public double latitude;
     public double longitude;
     private float speed;
+
+    public String getGuid(){
+        return guid;
+    }
 
     private int getAccuracy(){
         return (int) accuracy;
@@ -40,16 +49,12 @@ public class Point {
     }
 
     public String getTime(){
-        if (date == null) return "";
-        String[] split = date.split("T");
-        if (split.length != 2) return date;
-        String time = split[1];
-        return time.split("\\.")[0];
+        SimpleDateFormat localDateFormat = new SimpleDateFormat("HH:mm:ss");
+        return localDateFormat.format(date);
     }
 
     public String getSnippet(){
-        return "Time: " + getTime()  + System.lineSeparator() +
-                "Accuracy: " + getAccuracy()  + System.lineSeparator() +
+        return "Accuracy: " + getAccuracy()  + System.lineSeparator() +
                 "Speed: " + getSpeed() + System.lineSeparator() +
                 "Height: " + getHeight();
     }

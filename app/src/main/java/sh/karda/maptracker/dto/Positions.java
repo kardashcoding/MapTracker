@@ -2,6 +2,8 @@ package sh.karda.maptracker.dto;
 
 import java.util.ArrayList;
 
+import sh.karda.maptracker.database.AppDatabase;
+
 public class Positions {
     public ArrayList<Point> points;
 
@@ -39,5 +41,4 @@ public class Positions {
         }
         return maxValue;
     }
-
 }

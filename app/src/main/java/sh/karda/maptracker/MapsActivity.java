@@ -15,7 +15,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,8 +24,10 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
-import sh.karda.maptracker.database.DatabaseHelper;
+import sh.karda.maptracker.database.DbAsyncInsert;
+import sh.karda.maptracker.database.Migrations;
 import sh.karda.maptracker.get.GetLocations;
+import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.map.PopupAdapter;
 import sh.karda.maptracker.put.Sender;
 
@@ -62,15 +63,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
+                .addMigrations(Migrations.MIGRATION_4_5)
+                .allowMainThreadQueries()
                 .build();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (mMap == null || !PreferenceHelper.getDownloadAutomatically()) return;
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
-        getLocations.execute();
+        if (mMap == null) return;
+        if (!PreferenceHelper.getDownloadAutomatically()){
+            GetLocations getLocations = new GetLocations(mMap, getDeviceId());
+            getLocations.execute();
+        }
+        MapHelper.addToMap(mMap, db);
     }
 
     @Override
@@ -91,7 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId());
         getLocations.execute();
     }
 
@@ -103,12 +109,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) {
         if (location.getAccuracy() > 500) return;
-        DatabaseHelper threadHelper = new DatabaseHelper(db, location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName());
+        DbAsyncInsert threadHelper = new DbAsyncInsert(db, location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName());
         threadHelper.execute();
-        if (!PreferenceHelper.getSyncOnlyOnWifi()){
+        if (!PreferenceHelper.getSyncOnlyOnWifi() && !isOnline(getApplicationContext())) return;
             Sender sender = new Sender(db);
             sender.execute();
-        }
+    }
+
+    public boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert cm != null;
+        return cm.isActiveNetworkMetered();
     }
 
     @Override

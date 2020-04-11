@@ -1,16 +1,13 @@
 package sh.karda.maptracker.database;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.room.Room;
 import sh.karda.maptracker.R;
 
 import android.os.Bundle;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class DbActivity extends AppCompatActivity {
@@ -23,7 +20,7 @@ public class DbActivity extends AppCompatActivity {
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
                 .allowMainThreadQueries()
-                .fallbackToDestructiveMigration()
+                .addMigrations(Migrations.MIGRATION_4_5)
                 .build();
         List<PositionRow> rows = db.posDao().getLastDay(getDay(1), getDay(0));
         DbAdapter adapter = new DbAdapter(rows, getApplicationContext());

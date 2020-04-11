@@ -61,15 +61,7 @@ class PutRequest {
         br.close();
 
         String response = sb.toString();
-        try {
-            br = new BufferedReader(new InputStreamReader(uc.getInputStream()));
-            while((line = br.readLine()) != null){
-                stringBuffer.append(line);
-            }
-            br.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+
         Log.v(TAG, uc.getResponseMessage());
         if (uc.getResponseCode() == 200){
             Log.v(TAG, "Shit sendte: " + itemsSent);

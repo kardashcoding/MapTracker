@@ -40,12 +40,15 @@ public class PositionRow {
     @ColumnInfo(name = "wifi")
     private String wifi;
 
+    @ColumnInfo(name = "deleted")
+    private String deleted;
+
     @ColumnInfo(name = "connected")
     private boolean connectedToWifi;
 
     public boolean sent;
 
-    public PositionRow(String guid, String device, double longitude, double latitude, float accuracy, double height, float speed, Date date, String wifi, boolean connectedToWifi) {
+    public PositionRow(String guid, String device, double longitude, double latitude, float accuracy, double height, float speed, Date date, String wifi, String deleted, boolean connectedToWifi) {
         this.guid = guid;
         this.device = device;
         this.longitude = longitude;
@@ -55,6 +58,7 @@ public class PositionRow {
         this.speed = speed;
         this.date = date;
         this.wifi = wifi;
+        this.deleted = deleted;
         this.connectedToWifi = connectedToWifi;
         this.sent = false;
     }
@@ -156,4 +160,11 @@ public class PositionRow {
         this.id = id;
     }
 
+    public String getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(String deleted) {
+        this.deleted = deleted;
+    }
 }
