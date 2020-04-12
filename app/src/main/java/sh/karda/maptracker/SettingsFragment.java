@@ -12,6 +12,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
+import sh.karda.maptracker.database.DbManager;
 import sh.karda.maptracker.database.Migrations;
 import sh.karda.maptracker.database.PositionRow;
 import sh.karda.maptracker.put.Sender;
@@ -27,16 +28,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Sender sender = new Sender(MapsActivity.getDeviceId());
+                    Sender sender = new Sender("DELETE");
                     sender.execute();
-                    LocalDate d = LocalDate.now();
-                    String now = DateTimeFormatter.ISO_DATE_TIME.format(d);
-                    AppDatabase db = Room.databaseBuilder(MapsActivity.getAppContext(), AppDatabase.class, "production")
-                            .addMigrations(Migrations.MIGRATION_4_5)
-                            .allowMainThreadQueries()
-                            .build();
-                    //db.posDao().resetAll();
-                    db.posDao().deleteAllRows(now);
+                    DbManager.Delete();
                     return true;
 
                 }
@@ -48,12 +42,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             sendButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    AppDatabase db = Room.databaseBuilder(MapsActivity.getAppContext(), AppDatabase.class, "production")
-                            .addMigrations(Migrations.MIGRATION_4_5)
-                            .allowMainThreadQueries()
-                            .build();
-                    db.posDao().insertRow(createRandomRow());
-                    Sender sender = new Sender(db);
+                    DbManager.InsertAndWait(createRandomRow());
+                    Sender sender = new Sender("SEND");
                     sender.execute();
 
                     return true;

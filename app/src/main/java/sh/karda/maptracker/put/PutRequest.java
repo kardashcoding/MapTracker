@@ -15,16 +15,17 @@ import java.sql.Date;
 import java.util.List;
 
 import sh.karda.maptracker.database.AppDatabase;
+import sh.karda.maptracker.database.DbManager;
 import sh.karda.maptracker.database.PositionRow;
 
 class PutRequest {
     private static String TAG = "PutRequest";
     private static int itemsSent;
 
-    private static String getJson(AppDatabase db){
+    private static String getJsonFromDb(){
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonUTCDateAdapter()).create();
 
-        List<PositionRow> items = db.posDao().getAllUnsent();
+        List<PositionRow> items = DbManager.getDbInstance().posDao().getAllUnsent();
         if (items.size() == 0) return "";
         itemsSent = items.size();
         String jsonString = gson.toJson(items);
@@ -32,9 +33,9 @@ class PutRequest {
         return jsonString;
     }
 
-    static String send(String urlStr, AppDatabase db) throws IOException {
+    static String send(String urlStr) throws IOException {
         Log.v(TAG, "Shit kom hit 1");
-        String jsonString = getJson(db);
+        String jsonString = getJsonFromDb();
         if (jsonString.equals("")) return null;
         Log.v(TAG, "Shit Json: " + jsonString);
         URL url = new URL(urlStr);

@@ -1,5 +1,6 @@
 package sh.karda.maptracker.map;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -13,35 +14,37 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-
 import sh.karda.maptracker.PreferenceHelper;
-import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.PositionRow;
 import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
 
 public class MapHelper {
     private static Point prev = null;
-
     private static String TAG = "MapHelper";
     private static ArrayList<String> addedToMap = new ArrayList<String>();
 
-    public static void addToMap(GoogleMap map, AppDatabase db){
-        List<PositionRow> rows = db.posDao().getLastDay(getDay(1), getDay(0));
-        Positions points = new Positions();
-        for (PositionRow row: rows) {
-            points.points.add(new Point(row.getAccuracy(), row.isConnectedToWifi(), row.getDate(), row.getDevice(), row.getGuid(), row.getHeight(), row.getId(), row.getLatitude(), row.getLongitude(), row.getSpeed(), row.getWifi(), row.getDeleted()));
+    public static void addCurrentPositionToMap(GoogleMap map, PositionRow item){
+        boolean drawLines = PreferenceHelper.getDownloadAutomatically();
+
+        LatLng myLocation = new LatLng(item.getLatitude(), item.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(myLocation)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        map.addMarker(markerOptions);
+        if (prev != null && drawLines){
+            map.addPolyline(new PolylineOptions()
+                    .add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.getLatitude(), item.getLongitude()))
+                    .width(15));
+            prev.latitude = item.getLatitude();
+            prev.longitude = item.getLongitude();
         }
-        addToMap(map, points);
     }
-
-
 
     public static void addToMap(GoogleMap map, Positions points){
         try {
             if (map == null) return;
-            if (points == null || points.points == null || points.points.size() < 3) return;
+            if (points == null || points.points == null || points.points.size() == 0) return;
             map.clear();
             addedToMap.clear();
             boolean drawLines = PreferenceHelper.getDownloadAutomatically();
@@ -85,11 +88,5 @@ public class MapHelper {
             e.printStackTrace();
             Log.e(TAG, "Feil i Marker/Zoom delen");
         }
-    }
-
-    private static long getDay(int i) {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -i);
-        return cal.getTimeInMillis();
     }
 }

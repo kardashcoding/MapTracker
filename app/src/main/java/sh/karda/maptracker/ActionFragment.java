@@ -97,7 +97,7 @@ public class ActionFragment extends Fragment {
                 }else{
                     Log.v(TAG, "Shit kom hit 1");
 
-                    Sender s = new Sender(db);
+                    Sender s = new Sender("SEND");
                     s.execute();
                 }
                 return true;
