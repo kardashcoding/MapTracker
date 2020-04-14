@@ -27,6 +27,7 @@ class PutRequest {
 
         List<PositionRow> items = DbManager.getDbInstance().posDao().getAllUnsent();
         if (items.size() == 0) return "";
+
         itemsSent = items.size();
         String jsonString = gson.toJson(items);
         Log.v(TAG, jsonString);
@@ -62,6 +63,7 @@ class PutRequest {
         br.close();
 
         String response = sb.toString();
+        Log.v(TAG, "Response code: " + uc.getResponseCode());
 
         Log.v(TAG, uc.getResponseMessage());
         if (uc.getResponseCode() == 200){

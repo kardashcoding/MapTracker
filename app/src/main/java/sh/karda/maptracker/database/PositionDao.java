@@ -39,5 +39,5 @@ public interface PositionDao {
     void deleteAllRows(String now);
 
     @Query("UPDATE PositionRow SET deleted = NULL, sent = 0")
-    void resetAll();
+    void markAsUnsent();
 }

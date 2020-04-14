@@ -61,4 +61,18 @@ public class DbManager {
             e.printStackTrace();
         }
     }
+
+    public static void MarkAllAsUnsent() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getDbInstance().posDao().markAsUnsent();
+            }});
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

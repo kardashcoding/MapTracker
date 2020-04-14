@@ -11,7 +11,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        resValue "string", "url", "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w=="
+        resValue "string", "url", "https://azure-location-function-app.azurewebsites.net/api/LocationReceiver?code=wNwhR6L5QIVeWZqtY1mqCxWF/sl/Zqm/qt1FCjOfQh09Zm5I1P28vA=="
     }
 
     dependencies {

@@ -49,6 +49,11 @@
             android:title="Send"
             android:summary="Send current location now"/>
 
+        <Preference
+            android:key="@string/key_unsent_value"
+            android:title="Mark as unsent"
+            android:summary="Mark all rows as unsent"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/sync_header">

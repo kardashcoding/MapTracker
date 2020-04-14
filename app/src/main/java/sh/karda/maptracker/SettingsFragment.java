@@ -1,24 +1,13 @@
 package sh.karda.maptracker;
 
 import android.os.Bundle;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.room.Room;
-import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DbManager;
-import sh.karda.maptracker.database.Migrations;
 import sh.karda.maptracker.database.PositionRow;
 import sh.karda.maptracker.put.Sender;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
-    String deviceId;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +35,19 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     Sender sender = new Sender("SEND");
                     sender.execute();
 
+                    return true;
+                }
+            });
+        }
+
+        Preference unsentButton = findPreference(getString(R.string.key_unsent_value));
+        if (unsentButton != null){
+            unsentButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    DbManager.MarkAllAsUnsent();
+                    Sender sender = new Sender("SEND");
+                    sender.execute();
                     return true;
                 }
             });

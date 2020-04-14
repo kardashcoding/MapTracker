@@ -1,13 +1,8 @@
 package sh.karda.maptracker;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -20,69 +15,81 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
-import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DbAsyncGetLastDay;
 import sh.karda.maptracker.database.DbAsyncInsert;
-import sh.karda.maptracker.database.Migrations;
+import sh.karda.maptracker.database.DbManager;
 import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.PopupAdapter;
 import sh.karda.maptracker.put.Sender;
-import sh.karda.maptracker.util.Utils;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
     final String TAG = "MapsActivity";
-    final static String url = "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==";
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
     LocationManager locationManager;
-    AppDatabase db;
     private static Context context;
-    private MyReceiver myReceiver;
-    private LocationUpdatesService mService = null;
-    private boolean mBound = false;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
-
-
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-            mBound = false;
-        }
-    };
+    static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
+    FloatingActionButton fab, fab1, fab2;
+    Animation fabOpen, fabClose, rotateForward, rotateBackward;
+    boolean isOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        myReceiver = new MyReceiver();
-        bindService(new Intent(this, LocationUpdatesService.class), mServiceConnection,
-                Context.BIND_AUTO_CREATE);
+
         setContentView(R.layout.activity_maps);
+        fab = findViewById(R.id.floatingActionButton);
+        fab1 = findViewById(R.id.fab1);
+        fab2 = findViewById(R.id.fab2);
+        fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+        rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
+        rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateFab();
+            }
+        });
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                animateFab();
+            }
+        });
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MapsActivity.this, "Reloading positions", Toast.LENGTH_SHORT).show();
+                animateFab();
+            }
+        });
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -92,11 +99,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
         initiateLocationManager();
-        if (Utils.requestingLocationUpdates(this)) {
+        if (requestingLocationUpdates(this)) {
             if (!checkPermissions()) {
                 requestPermissions();
             }
         }
+    }
+
+    private void animateFab(){
+        if (isOpen){
+            fab.startAnimation(rotateForward);
+            fab1.startAnimation(fabClose);
+            fab2.startAnimation(fabClose);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isOpen = false;
+
+        }else{
+            fab.startAnimation(rotateBackward);
+            fab1.startAnimation(fabOpen);
+            fab2.startAnimation(fabOpen);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isOpen = true;
+        }
+    }
+
+    static boolean requestingLocationUpdates(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false);
     }
     private boolean checkPermissions() {
         return  PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
@@ -148,7 +179,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission was granted.
-                mService.requestLocationUpdates();
+                requestLocation();
             } else {
                 // Permission denied.
                 Snackbar.make(
@@ -178,11 +209,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStart() {
         super.onStart();
-
-        if (mService != null) {
-            mService.requestLocationUpdates();
-        }
-
         if (mMap == null) return;
         if (!PreferenceHelper.getDownloadAutomatically()){
             GetLocations getLocations = new GetLocations(mMap, getDeviceId());
@@ -195,41 +221,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
-                new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
-    }
-
-    @Override
-    protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        if (mBound) {
-            // Unbind from the service. This signals to the service that this activity is no longer
-            // in the foreground, and the service can respond by promoting itself to a foreground
-            // service.
-            unbindService(mServiceConnection);
-            mBound = false;
-        }
-        androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener((SharedPreferences.OnSharedPreferenceChangeListener) this);
-        super.onStop();
-    }
-    @Override
     public void onDestroy(){
         super.onDestroy();
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        if (mService != null) {
-            mService.requestLocationUpdates();
-        }
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
         GetLocations getLocations = new GetLocations(mMap, getDeviceId());
@@ -241,26 +238,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Settings.Secure.ANDROID_ID);
     }
 
-    private class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-            if (location != null) {
-                Log.v(TAG, "Posisjon har endret seg");
-                // Her havner Toast for location
-            }
-        }
-    }
 
-/*    @Override
+    @Override
     public void onLocationChanged(Location location) {
-        if (location.getAccuracy() > 500) return;
-        DbAsyncInsert threadHelper = new DbAsyncInsert(db, location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName(), mMap);
+        TextView speedText = findViewById(R.id.text_speed);
+        TextView accuracyText = findViewById(R.id.text_accuracy);
+        speedText.setText("Speed: " + (int) (location.getSpeed()* 3.6));
+        accuracyText.setText("Accuracy: " + (int) location.getAccuracy());
+        if (location.getAccuracy() > 150) return;
+        DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName(), mMap);
         threadHelper.execute();
         if (!PreferenceHelper.getSyncOnlyOnWifi() && !isOnline(getApplicationContext())) return;
             Sender sender = new Sender("SEND");
             sender.execute();
-    }*/
+    }
 
     public boolean isOnline(Context context) {
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -268,7 +259,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return cm.isActiveNetworkMetered();
     }
 
-/*    @Override
+    @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
 
     }
@@ -285,33 +276,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     public void requestLocation() {
-
         Criteria criteria = new Criteria();
         criteria.setAccuracy(PreferenceHelper.getAccuracyFromPreferences());
         criteria.setPowerRequirement(PreferenceHelper.getPowerFromPreferences());
         String provider = locationManager.getBestProvider(criteria, true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         assert provider != null;
         locationManager.requestLocationUpdates(provider, PreferenceHelper.getSecondsFromPreferences(), PreferenceHelper.getDistanceFromPreferences(), this);
-    }*/
+    }
 
     public static Context getAppContext() {
         return MapsActivity.context;
-    }
-
-
-    private boolean isLocationEnabled(){
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
     public String wifiName(){
@@ -345,8 +322,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initiateLocationManager(){
-        //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        requestLocation();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
@@ -355,19 +332,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("key_power")) {
-                //requestLocation();
+                requestLocation();
                 Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_power", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_accuracy")) {
-                //requestLocation();
+                requestLocation();
                 Toast.makeText(getApplicationContext(), "Accuracy satt til " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_seconds")) {
-                //requestLocation();
+                requestLocation();
                 Toast.makeText(getApplicationContext(), "Seconds satt til " + sharedPreferences.getString("key_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_distance")) {
-                //requestLocation();
+                requestLocation();
                 Toast.makeText(getApplicationContext(), "Distance satt til " + sharedPreferences.getString("key_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
         }
