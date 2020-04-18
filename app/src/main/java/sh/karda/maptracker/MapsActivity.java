@@ -1,7 +1,5 @@
 package sh.karda.maptracker;
 
-import android.Manifest;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -13,12 +11,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -28,22 +21,15 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
-import java.util.Map;
-
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
-import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DbAsyncGetLastDay;
 import sh.karda.maptracker.database.DbAsyncInsert;
 import sh.karda.maptracker.database.DbManager;
@@ -56,20 +42,13 @@ import static sh.karda.maptracker.LocationService.CHANNEL_ID;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
 
     final String TAG = "MapsActivity";
-    final static int PERMISSION_ALL = 1;
-    final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private static GoogleMap mMap;
-    LocationManager locationManager;
     private static Context context;
-
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
-    static final String ACTION_BROADCAST = "sh.karda.maptracker.broadcast";
-
     FloatingActionButton fab, fab1, fab2;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
-    //LocationStuff locationStuff;
     private LocationService locationService = null;
     private boolean bound;
     MyReceiver myReceiver;
@@ -231,7 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
-                new IntentFilter(ACTION_BROADCAST));
+                new IntentFilter(LocationService.ACTION_BROADCAST));
     }
 
     @Override
@@ -264,7 +243,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // service.
             unbindService(serviceConnection);
             bound = false;
-            //locationStuff.unRequestLocation();
         }
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
