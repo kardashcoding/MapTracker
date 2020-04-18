@@ -1,5 +1,6 @@
 package sh.karda.maptracker;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Criteria;
 
@@ -47,6 +48,16 @@ public class PreferenceHelper {
         }
     }
 
+    public static boolean getToastFromPreferences(){
+        try{
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_toast", false);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     static boolean getDrawLinesFromPreferences(){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
@@ -57,5 +68,23 @@ public class PreferenceHelper {
         }
     }
 
+    static boolean getSyncOnlyOnWifi() {
+        try {
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_sync", false);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public static boolean getDownloadAutomatically() {
+        try {
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_download", false);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
 

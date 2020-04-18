@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -25,7 +27,6 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
 
     // View lookup cache
     private static class ViewHolder {
-        TextView txtWifi;
         TextView txtTime;
         TextView txtDate;
         TextView txtLatitude;
@@ -35,7 +36,7 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
         TextView txtHeight;
     }
 
-    public DbAdapter(List<PositionRow> data, Context context) {
+    DbAdapter(List<PositionRow> data, Context context) {
         super(context, R.layout.row_item, data);
         this.row = data;
         this.context = context;
@@ -48,8 +49,9 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
     }
     private int lastPosition = -1;
 
+    @NotNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NotNull ViewGroup parent) {
         // Get the data item for this position
         PositionRow positionRow = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
@@ -62,7 +64,6 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
             viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.row_item, parent, false);
-            viewHolder.txtWifi = convertView.findViewById(R.id.wifi);
             viewHolder.txtTime = convertView.findViewById(R.id.time);
             viewHolder.txtDate = convertView.findViewById(R.id.date);
             viewHolder.txtLatitude = convertView.findViewById(R.id.latitude);
@@ -82,8 +83,8 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
         lastPosition = position;
 
 
+        assert positionRow != null;
         String lat = getValue(positionRow.getLongitude());
-        viewHolder.txtWifi.setText(positionRow.getWifi());
         viewHolder.txtTime.setText(positionRow.getTimeString());
         viewHolder.txtDate.setText(positionRow.getDateString());
         viewHolder.txtLatitude.setText(lat);
@@ -92,7 +93,6 @@ public class DbAdapter extends ArrayAdapter<PositionRow> implements View.OnClick
         viewHolder.txtSpeed.setText(getValue(positionRow.getSpeed()));
         viewHolder.txtHeight.setText(getValue(positionRow.getHeight()));
         if (positionRow.sent){
-            viewHolder.txtWifi.setTextColor(Color.parseColor("#7f9bc9"));
             viewHolder.txtTime.setTextColor(Color.parseColor("#7f9bc9"));
             viewHolder.txtDate.setTextColor(Color.parseColor("#7f9bc9"));
             viewHolder.txtLatitude.setTextColor(Color.parseColor("#7f9bc9"));

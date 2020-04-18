@@ -21,7 +21,9 @@ import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.get.GetLocations;
+import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.map.PopupAdapter;
+import sh.karda.maptracker.put.Sender;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     final String TAG = "MapsActivity";
@@ -46,10 +48,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MapsActivity.context = getApplicationContext();
         mapFragment.getMapAsync(this);
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
+        SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
+
         initiateLocationManager();
         requestPermissions(PERMISSIONS, PERMISSION_ALL);
 
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
+                .addMigrations(Migrations.MIGRATION_4_5)
+                .allowMainThreadQueries()
                 .build();
         serviceIntent = new Intent(getAppContext(), LocationTrackerService.class);
         serviceIntent.setAction("sh.karda.maptracker.LONGRUNSERVICE");
@@ -60,8 +66,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onStart() {
         super.onStart();
         if (mMap == null) return;
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
-        getLocations.execute();
+        if (!PreferenceHelper.getDownloadAutomatically()){
+            GetLocations getLocations = new GetLocations(mMap, getDeviceId());
+            getLocations.execute();
+        }
+        MapHelper.addToMap(mMap, db);
     }
 
     @Override
@@ -73,12 +82,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        GetLocations getLocations = new GetLocations(mMap, getDeviceId(), PreferenceHelper.getDrawLinesFromPreferences());
+        GetLocations getLocations = new GetLocations(mMap, getDeviceId());
         getLocations.execute();
     }
 
-    private String getDeviceId(){
-        return Settings.Secure.getString(getApplicationContext().getContentResolver(),
+    public static String getDeviceId(){
+        return Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
     }
 
