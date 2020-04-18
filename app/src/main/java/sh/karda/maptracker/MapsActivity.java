@@ -137,14 +137,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
         initiateLocationManager();
-
-        //if (requestingLocationUpdates(this)) {
-        //    if (!checkPermissions()) {
-        //        requestPermissions();
-        //    }
-        //}
-        //locationStuff = new LocationStuff(this);
-        //locationStuff.requestLocation();
     }
 
     private void createNotificationChannel() {
@@ -213,7 +205,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Permission denied.
                 Snackbar.make(
                         findViewById(R.id.activity_maps),
-                        R.string.permission_denied_explanation,
+                        R.string.permission_warning,
                         Snackbar.LENGTH_INDEFINITE)
                         .setAction(R.string.settings, new View.OnClickListener() {
                             @Override

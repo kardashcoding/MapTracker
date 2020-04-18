@@ -21,26 +21,10 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <service
-            android:name=".LocationTrackerService"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="sh.karda.maptracker.LONGRUNSERVICE" />
-            </intent-filter>
-        </service>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".database.DbActivity" />
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
@@ -55,7 +39,6 @@
             android:value="@string/google_maps_key" />
         <service android:name=".LocationService"
             android:enabled="true"
-            android:exported="true"
             android:foregroundServiceType="location"/>
     </application>
 </manifest>

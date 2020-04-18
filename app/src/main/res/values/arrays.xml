@@ -1,13 +1,17 @@
 <resources>
     <!-- Reply Preference -->
     <string-array name="accuracy_entries">
-        <item>ACCURACY_COARSE</item>
-        <item>ACCURACY_FINE</item>
+        <item>Balanced</item>
+        <item>High accuracy</item>
+        <item>Low power</item>
+        <item>No power</item>
     </string-array>
 
     <string-array name="accuracy_values">
-        <item>ACCURACY_COARSE</item>
-        <item>ACCURACY_FINE</item>
+        <item>PRIORITY_BALANCED_POWER_ACCURACY</item>
+        <item>PRIORITY_HIGH_ACCURACY</item>
+        <item>PRIORITY_LOW_POWER</item>
+        <item>PRIORITY_NO_POWER</item>
     </string-array>
     <string-array name="power_entries">
         <item>POWER_LOW</item>

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Criteria;
 
+import com.google.android.gms.location.LocationRequest;
+
 import androidx.preference.PreferenceManager;
 
 public class PreferenceHelper {
@@ -11,10 +13,12 @@ public class PreferenceHelper {
     public static int getAccuracyFromPreferences() {
         SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
         String accuracy = p.getString("key_accuracy", "no value found");
-        if (accuracy.equals("ACCURACY_COARSE")) return Criteria.ACCURACY_COARSE;
-        if (accuracy.equals("ACCURACY_FINE")) return Criteria.ACCURACY_FINE;
+        if (accuracy.equals("PRIORITY_BALANCED_POWER_ACCURACY")) return LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+        if (accuracy.equals("PRIORITY_HIGH_ACCURACY")) return LocationRequest.PRIORITY_HIGH_ACCURACY;
+        if (accuracy.equals("PRIORITY_LOW_POWER")) return LocationRequest.PRIORITY_LOW_POWER;
+        if (accuracy.equals("PRIORITY_NO_POWER")) return LocationRequest.PRIORITY_NO_POWER;
 
-        return Criteria.ACCURACY_FINE;
+        return LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
     }
     public static int getPowerFromPreferences() {
         SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());

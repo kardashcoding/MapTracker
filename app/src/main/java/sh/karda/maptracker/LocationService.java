@@ -298,7 +298,6 @@ public class LocationService extends Service {
         }
     }
 
-    private boolean hasShowed = false;
     private void onNewLocation(Location location) {
         Log.i(TAG, "New location: " + location);
 
@@ -310,9 +309,8 @@ public class LocationService extends Service {
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
         // Update notification content if running as a foreground service.
-        if (serviceIsRunningInForeground(this) && !hasShowed) {
-            //mNotificationManager.notify(NOTIFICATION_ID, getNotification());
-            hasShowed = true;
+        if (serviceIsRunningInForeground(this)) {
+            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
         }
     }
 
@@ -321,15 +319,16 @@ public class LocationService extends Service {
      */
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(PreferenceHelper.getSecondsFromPreferences());
-        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences());
+        int interval = PreferenceHelper.getSecondsFromPreferences() * 1000;
+        mLocationRequest.setInterval(interval);
+        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences() * 500);
         mLocationRequest.setPriority(PreferenceHelper.getAccuracyFromPreferences());
         mLocationRequest.setSmallestDisplacement(PreferenceHelper.getDistanceFromPreferences());
     }
 
     public void updateLocationSettings(){
-        mLocationRequest.setInterval(PreferenceHelper.getSecondsFromPreferences());
-        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences());
+        mLocationRequest.setInterval(PreferenceHelper.getSecondsFromPreferences() * 1000);
+        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences() * 500);
         mLocationRequest.setPriority(PreferenceHelper.getAccuracyFromPreferences());
         mLocationRequest.setSmallestDisplacement(PreferenceHelper.getDistanceFromPreferences());
     }
