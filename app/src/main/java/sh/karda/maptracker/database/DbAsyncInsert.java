@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
 
+import sh.karda.maptracker.MapsActivity;
 import sh.karda.maptracker.dto.Positions;
 import sh.karda.maptracker.map.MapHelper;
 
@@ -25,7 +26,7 @@ public class DbAsyncInsert extends AsyncTask<Void, Void, PositionRow> {
         this.deviceId = deviceId;
         this.gotNetwork = networkAvailable;
         this.wifiName = wifiName;
-        this.map = map;
+        this.map = MapsActivity.getMap();
     }
 
     @Override

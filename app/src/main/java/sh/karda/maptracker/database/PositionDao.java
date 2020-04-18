@@ -33,7 +33,7 @@ public interface PositionDao {
     List<PositionRow> getLastDay(long from, long to);
 
     @Query("UPDATE PositionRow SET sent = 1 WHERE guid = :s")
-    void setRowsAsSent(String s);
+    int setRowsAsSent(String s);
 
     @Query("UPDATE PositionRow SET deleted = :now, sent = 0")
     void deleteAllRows(String now);

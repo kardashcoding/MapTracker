@@ -1,8 +1,15 @@
 package sh.karda.maptracker;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -15,6 +22,7 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -29,9 +37,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DbAsyncGetLastDay;
@@ -41,23 +53,48 @@ import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.PopupAdapter;
 import sh.karda.maptracker.put.Sender;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+import static sh.karda.maptracker.LocationService.CHANNEL_ID;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
     final String TAG = "MapsActivity";
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
     LocationManager locationManager;
     private static Context context;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
+    static final String ACTION_BROADCAST = "sh.karda.maptracker.broadcast";
+
     FloatingActionButton fab, fab1, fab2;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
+    //LocationStuff locationStuff;
+    private LocationService locationService = null;
+    private boolean bound;
+    MyReceiver myReceiver;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
+            locationService = binder.getService();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            locationService = null;
+            bound = false;
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        myReceiver = new MyReceiver();
+        createNotificationChannel();
         setContentView(R.layout.activity_maps);
         fab = findViewById(R.id.floatingActionButton);
         fab1 = findViewById(R.id.fab1);
@@ -99,9 +136,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
         initiateLocationManager();
-        if (requestingLocationUpdates(this)) {
-            if (!checkPermissions()) {
-                requestPermissions();
+        //if (requestingLocationUpdates(this)) {
+        //    if (!checkPermissions()) {
+        //        requestPermissions();
+        //    }
+        //}
+        //locationStuff = new LocationStuff(this);
+        //locationStuff.requestLocation();
+    }
+
+    private void createNotificationChannel() {
+        NotificationChannel serviceChannel = new NotificationChannel(CHANNEL_ID, "eksempel", NotificationManager.IMPORTANCE_LOW);
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(serviceChannel);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+    }
+
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = intent.getParcelableExtra(LocationService.EXTRA_LOCATION);
+            if (location != null) {
+                TextView speedText = findViewById(R.id.text_speed);
+                TextView accuracyText = findViewById(R.id.text_accuracy);
+                speedText.setText("Speed: " + (int) (location.getSpeed()* 3.6));
+                accuracyText.setText("Accuracy: " + (int) location.getAccuracy());
+                if (location.getAccuracy() > 150) return;
+                DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, getDeviceId(), false, "Test", mMap);
+                threadHelper.execute();
+                if (PreferenceHelper.getSyncOnlyOnWifi() && !LocationStuff.isOnline(getAppContext())) return;
+                Sender sender = new Sender("SEND");
+                sender.execute();
             }
         }
     }
@@ -125,48 +194,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    static boolean requestingLocationUpdates(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false);
-    }
-    private boolean checkPermissions() {
-        return  PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-    }
-
-    private void requestPermissions() {
-        boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
-
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
-        if (shouldProvideRationale) {
-            Log.i(TAG, "Displaying permission rationale to provide additional context.");
-            Snackbar.make(
-                    findViewById(R.id.activity_maps),
-                    R.string.permission_rationale,
-                    Snackbar.LENGTH_INDEFINITE)
-                    .setAction(R.string.ok, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            // Request permission
-                            ActivityCompat.requestPermissions(MapsActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    REQUEST_PERMISSIONS_REQUEST_CODE);
-                        }
-                    })
-                    .show();
-        } else {
-            Log.i(TAG, "Requesting permission");
-            // Request permission. It's possible this can be auto answered if device policy
-            // sets the permission in a given state or the user denied the permission
-            // previously and checked "Never ask again".
-            ActivityCompat.requestPermissions(MapsActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_PERMISSIONS_REQUEST_CODE);
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -179,7 +206,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission was granted.
-                requestLocation();
+                locationService.requestLocationUpdates();
             } else {
                 // Permission denied.
                 Snackbar.make(
@@ -207,8 +234,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
+                new IntentFilter(ACTION_BROADCAST));
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceiver);
+        super.onPause();
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
+        bindService(new Intent(this, LocationService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+        if (locationService != null) locationService.requestLocationUpdates();
         if (mMap == null) return;
         if (!PreferenceHelper.getDownloadAutomatically()){
             GetLocations getLocations = new GetLocations(mMap, getDeviceId());
@@ -216,9 +260,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
         asyncGetLastDay.execute();
-
-
     }
+
+    @Override
+    protected void onStop() {
+        if (bound) {
+            // Unbind from the service. This signals to the service that this activity is no longer
+            // in the foreground, and the service can respond by promoting itself to a foreground
+            // service.
+            unbindService(serviceConnection);
+            bound = false;
+            //locationStuff.unRequestLocation();
+        }
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+        super.onStop();
+    }
+
 
     @Override
     public void onDestroy(){
@@ -239,91 +297,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    @Override
-    public void onLocationChanged(Location location) {
-        TextView speedText = findViewById(R.id.text_speed);
-        TextView accuracyText = findViewById(R.id.text_accuracy);
-        speedText.setText("Speed: " + (int) (location.getSpeed()* 3.6));
-        accuracyText.setText("Accuracy: " + (int) location.getAccuracy());
-        if (location.getAccuracy() > 150) return;
-        DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, getDeviceId(), isNetworkAvailable(getApplicationContext()), wifiName(), mMap);
-        threadHelper.execute();
-        if (!PreferenceHelper.getSyncOnlyOnWifi() && !isOnline(getApplicationContext())) return;
-            Sender sender = new Sender("SEND");
-            sender.execute();
-    }
-
-    public boolean isOnline(Context context) {
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        assert cm != null;
-        return cm.isActiveNetworkMetered();
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
-
-
-    public void requestLocation() {
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(PreferenceHelper.getAccuracyFromPreferences());
-        criteria.setPowerRequirement(PreferenceHelper.getPowerFromPreferences());
-        String provider = locationManager.getBestProvider(criteria, true);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        assert provider != null;
-        locationManager.requestLocationUpdates(provider, PreferenceHelper.getSecondsFromPreferences(), PreferenceHelper.getDistanceFromPreferences(), this);
-    }
-
     public static Context getAppContext() {
         return MapsActivity.context;
     }
 
-    public String wifiName(){
-        WifiManager wifiManager = (WifiManager) getSystemService (Context.WIFI_SERVICE);
-        WifiInfo info;
-        if (wifiManager == null) return "";
-        info = wifiManager.getConnectionInfo ();
-        return info.getSSID();
-    }
-
-    public static boolean isNetworkAvailable(Context context) {
-        if(context == null)  return false;
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    return true;
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    return true;
-                } else return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
-            }
-        }
-        return false;
-    }
 
 
-    public GoogleMap getMap() {
+    public static GoogleMap getMap() {
         return mMap;
     }
 
     private void initiateLocationManager(){
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        requestLocation();
+        //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //requestLocation();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
@@ -331,22 +317,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (locationService == null) return;
             if (key.equals("key_power")) {
-                requestLocation();
                 Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_power", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_accuracy")) {
-                requestLocation();
                 Toast.makeText(getApplicationContext(), "Accuracy satt til " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_seconds")) {
-                requestLocation();
                 Toast.makeText(getApplicationContext(), "Seconds satt til " + sharedPreferences.getString("key_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_distance")) {
-                requestLocation();
                 Toast.makeText(getApplicationContext(), "Distance satt til " + sharedPreferences.getString("key_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
+            locationService.updateLocationSettings();
         }
     };
 }
