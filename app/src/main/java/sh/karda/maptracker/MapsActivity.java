@@ -11,10 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -56,12 +52,14 @@ import sh.karda.maptracker.put.Sender;
 import static sh.karda.maptracker.LocationService.CHANNEL_ID;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
+
     final String TAG = "MapsActivity";
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private static GoogleMap mMap;
     LocationManager locationManager;
     private static Context context;
+
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
     static final String ACTION_BROADCAST = "sh.karda.maptracker.broadcast";
@@ -88,6 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             bound = false;
         }
     };
+
 
 
     @Override
@@ -136,6 +135,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
         initiateLocationManager();
+
         //if (requestingLocationUpdates(this)) {
         //    if (!checkPermissions()) {
         //        requestPermissions();
@@ -277,11 +277,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
     }
 
-
     @Override
     public void onDestroy(){
         super.onDestroy();
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -302,8 +302,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-
     public static GoogleMap getMap() {
+
         return mMap;
     }
 

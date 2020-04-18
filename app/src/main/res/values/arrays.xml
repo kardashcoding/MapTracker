@@ -3,17 +3,11 @@
     <string-array name="accuracy_entries">
         <item>ACCURACY_COARSE</item>
         <item>ACCURACY_FINE</item>
-        <item>ACCURACY_HIGH</item>
-        <item>ACCURACY_LOW</item>
-        <item>ACCURACY_MEDIUM</item>
     </string-array>
 
     <string-array name="accuracy_values">
         <item>ACCURACY_COARSE</item>
         <item>ACCURACY_FINE</item>
-        <item>ACCURACY_HIGH</item>
-        <item>ACCURACY_LOW</item>
-        <item>ACCURACY_MEDIUM</item>
     </string-array>
     <string-array name="power_entries">
         <item>POWER_LOW</item>
