@@ -14,19 +14,17 @@ import java.util.ArrayList;
 import sh.karda.maptracker.MapsActivity;
 import sh.karda.maptracker.PreferenceHelper;
 import sh.karda.maptracker.database.AppDatabase;
+import sh.karda.maptracker.database.DbManager;
 
 public class Sender extends AsyncTask<Void, Void, String> {
-    private final static String urlStr = "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==";
+    private final static String urlStr = "https://azure-location-function-app.azurewebsites.net/api/LocationReceiver?code=wNwhR6L5QIVeWZqtY1mqCxWF/sl/Zqm/qt1FCjOfQh09Zm5I1P28vA==";
     private static final String TAG = "Sender";
-    private AppDatabase db;
     private String deviceId;
+    private String action;
 
-    public Sender(AppDatabase db){
-        this.db = db;
-    }
-
-    public Sender(String deviceId){
-        this.deviceId = deviceId;
+    public Sender(String action){
+        this.action = action;
+        deviceId = MapsActivity.getDeviceId();
     }
 
     @Override
@@ -38,12 +36,12 @@ public class Sender extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void...params){
         try {
             Log.v(TAG, "Shit kom hit 1");
-            if (db != null) {
-                String result = PutRequest.send(urlStr, db);
+            if (action.equals("SEND")) {
+                String result = PutRequest.send(urlStr);
                 int i = markAsDeleted(result);
                 return i + " was sent";
             }
-            if (deviceId != null) {
+            if (action.equals("DELETE")) {
                 return PutRequest.delete(urlStr, deviceId);
             }
         } catch (IOException e) {
@@ -70,7 +68,7 @@ public class Sender extends AsyncTask<Void, Void, String> {
         ArrayList<String> result = gson.fromJson(response, new TypeToken<ArrayList<String>>(){}.getType());
         for (String s: result) {
             i++;
-            db.posDao().setRowsAsSent(s);
+            DbManager.SetRowsAsSent(s);
         }
 
         return i;

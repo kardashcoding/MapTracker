@@ -29,7 +29,7 @@ public class GetLocations extends AsyncTask<Void, Void, Positions> {
     private GoogleMap map;
     private String deviceId;
     private String TAG = "GetLocations";
-    private final String url = "https://locationfunction.azurewebsites.net/api/LocationReceiver?code=bJ7eizF6A27F/g3/yblRcFUW3EYz0zAZavFHlL04/v6JN3W/6w410w==";
+    private final String url = "https://azure-location-function-app.azurewebsites.net/api/LocationReceiver?code=wNwhR6L5QIVeWZqtY1mqCxWF/sl/Zqm/qt1FCjOfQh09Zm5I1P28vA==";
 
     public GetLocations(GoogleMap map, String device){
         this.map = map;

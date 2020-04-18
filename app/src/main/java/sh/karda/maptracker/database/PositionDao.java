@@ -1,5 +1,6 @@
 package sh.karda.maptracker.database;
 
+import java.util.ArrayList;
 import java.util.List;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -32,11 +33,11 @@ public interface PositionDao {
     List<PositionRow> getLastDay(long from, long to);
 
     @Query("UPDATE PositionRow SET sent = 1 WHERE guid = :s")
-    void setRowsAsSent(String s);
+    int setRowsAsSent(String s);
 
     @Query("UPDATE PositionRow SET deleted = :now, sent = 0")
     void deleteAllRows(String now);
 
     @Query("UPDATE PositionRow SET deleted = NULL, sent = 0")
-    void resetAll();
+    void markAsUnsent();
 }
