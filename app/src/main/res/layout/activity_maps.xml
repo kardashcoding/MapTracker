@@ -17,13 +17,13 @@
         tools:layout="@layout/activity_maps">
     </fragment>
 
-        <fragment
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:id="@+id/fragment_buttons"
-            android:layout_gravity="top"
-            android:name="sh.karda.maptracker.ActionFragment"
-            tools:layout="@layout/fragment_action" />
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:id="@+id/fragment_buttons"
+        android:layout_gravity="top"
+        android:name="sh.karda.maptracker.ActionFragment"
+        tools:layout="@layout/fragment_action" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -51,6 +51,21 @@
             android:layout_marginBottom="90dp"
             android:clickable="true"
             android:src="@drawable/ic_option"
+            android:visibility="invisible"
+            app:layout_anchor="@id/floatingActionButton"
+            app:layout_anchorGravity="bottom"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginEnd="100dp"
+            android:layout_marginStart="100dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="90dp"
+            android:clickable="true"
+            android:src="@drawable/ic_start"
             android:visibility="invisible"
             app:layout_anchor="@id/floatingActionButton"
             app:layout_anchorGravity="bottom"/>

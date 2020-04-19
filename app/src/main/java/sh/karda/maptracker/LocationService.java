@@ -271,7 +271,7 @@ public class LocationService extends Service {
                 .addAction(R.drawable.ic_cancel, getString(R.string.remove_location_updates),
                         servicePendingIntent)
                 .setContentText(text)
-                .setContentTitle("Tittel")
+                .setContentTitle("Currently tracking your location")
                 .setSmallIcon(R.mipmap.ic_launcher);
 
         // Set the Channel ID for Android O.

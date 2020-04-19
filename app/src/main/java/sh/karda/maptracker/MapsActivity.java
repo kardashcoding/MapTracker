@@ -1,5 +1,6 @@
 package sh.karda.maptracker;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
@@ -46,12 +48,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static Context context;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
-    FloatingActionButton fab, fab1, fab2;
+    FloatingActionButton fab, fab1, fab2, fabStart;
+    boolean hasStarted = false;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
     private LocationService locationService = null;
     private boolean bound;
     MyReceiver myReceiver;
+    TextView speedText, accuracyText;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -76,9 +80,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myReceiver = new MyReceiver();
         createNotificationChannel();
         setContentView(R.layout.activity_maps);
+
+        speedText = findViewById(R.id.text_speed);
+        accuracyText = findViewById(R.id.text_accuracy);
+
         fab = findViewById(R.id.floatingActionButton);
         fab1 = findViewById(R.id.fab1);
         fab2 = findViewById(R.id.fab2);
+        fabStart = findViewById(R.id.fab_start);
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
@@ -106,6 +115,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        fabStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasStarted){
+                    locationService.removeLocationUpdates();
+                    setButtonsState(false);
+                    animateFab();
+                    Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
+                    speedText.setText("");
+                    accuracyText.setText("");
+                }else{
+                    if (!checkPermissions()) {
+                        requestPermissions();
+                    } else {
+                        locationService.requestLocationUpdates();
+                        setButtonsState(true);
+                        animateFab();
+                        Toast.makeText(getApplicationContext(), "Started", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -118,6 +150,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         initiateLocationManager();
     }
 
+    private boolean checkPermissions() {
+        return  PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+    private void requestPermissions() {
+        boolean shouldProvideRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION);
+
+        // Provide an additional rationale to the user. This would happen if the user denied the
+        // request previously, but didn't check the "Don't ask again" checkbox.
+        if (shouldProvideRationale) {
+            Log.i(TAG, "Displaying permission rationale to provide additional context.");
+            Snackbar.make(
+                    findViewById(R.id.activity_maps),
+                    R.string.permission_rationale,
+                    Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.ok, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // Request permission
+                            ActivityCompat.requestPermissions(MapsActivity.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    REQUEST_PERMISSIONS_REQUEST_CODE);
+                        }
+                    })
+                    .show();
+        } else {
+            Log.i(TAG, "Requesting permission");
+            // Request permission. It's possible this can be auto answered if device policy
+            // sets the permission in a given state or the user denied the permission
+            // previously and checked "Never ask again".
+            ActivityCompat.requestPermissions(MapsActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
     private void createNotificationChannel() {
         NotificationChannel serviceChannel = new NotificationChannel(CHANNEL_ID, "eksempel", NotificationManager.IMPORTANCE_LOW);
         NotificationManager manager = getSystemService(NotificationManager.class);
@@ -126,7 +196,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
+        if (key.equals(KEY_REQUESTING_LOCATION_UPDATES)){
+            setButtonsState(sharedPreferences.getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false));
+        }
     }
 
     private class MyReceiver extends BroadcastReceiver {
@@ -134,8 +206,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra(LocationService.EXTRA_LOCATION);
             if (location != null) {
-                TextView speedText = findViewById(R.id.text_speed);
-                TextView accuracyText = findViewById(R.id.text_accuracy);
                 speedText.setText("Speed: " + (int) (location.getSpeed()* 3.6));
                 accuracyText.setText("Accuracy: " + (int) location.getAccuracy());
                 if (location.getAccuracy() > 150) return;
@@ -153,16 +223,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             fab.startAnimation(rotateForward);
             fab1.startAnimation(fabClose);
             fab2.startAnimation(fabClose);
+            fabStart.startAnimation(fabClose);
             fab1.setClickable(false);
             fab2.setClickable(false);
+            fabStart.setClickable(false);
             isOpen = false;
 
         }else{
             fab.startAnimation(rotateBackward);
             fab1.startAnimation(fabOpen);
             fab2.startAnimation(fabOpen);
+            fabStart.startAnimation(fabOpen);
             fab1.setClickable(true);
             fab2.setClickable(true);
+            fabStart.setClickable(true);
             isOpen = true;
         }
     }
@@ -182,6 +256,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 locationService.requestLocationUpdates();
             } else {
                 // Permission denied.
+                setButtonsState(false);
                 Snackbar.make(
                         findViewById(R.id.activity_maps),
                         R.string.permission_warning,
@@ -233,6 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
         asyncGetLastDay.execute();
+        setButtonsState(requestingLocationUpdates(this));
     }
 
     @Override
@@ -305,4 +381,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationService.updateLocationSettings();
         }
     };
+
+    static boolean requestingLocationUpdates(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_REQUESTING_LOCATION_UPDATES, false);
+    }
+
+    private void setButtonsState(boolean requestingLocationUpdates) {
+        if (requestingLocationUpdates) {
+            fabStart.setImageResource(R.drawable.ic_pause);
+            hasStarted = true;
+        } else {
+            fabStart.setImageResource(R.drawable.ic_start);
+            hasStarted = false;
+        }
+    }
 }
