@@ -1,5 +1,6 @@
 package sh.karda.maptracker.map;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
 import com.google.android.gms.maps.CameraUpdate;
@@ -74,6 +75,31 @@ public class MapHelper {
             e.printStackTrace();
             Log.e(TAG, "Feil i Marker/Zoom delen");
         }
+    }
+
+    public static void drawPolyline(GoogleMap map, double lat1, double lng1, double lat2, double lng2, float speed){
+        LatLng latLng1 = new LatLng(lat1, lng1);
+        LatLng latLng2 = new LatLng(lat2, lng2);
+        PolylineOptions polylineOptions = new PolylineOptions()
+                .add(latLng1, latLng2)
+                .width(5)
+                .color(getLineColor(speed));
+        map.addPolyline(polylineOptions);
+    }
+
+    private static int getLineColor(float speed) {
+        if ((int)speed < 1) return Color.rgb(134, 1, 175);
+        if ((int)speed == 2) return Color.rgb(61, 1, 164);
+        if ((int)speed == 3) return Color.rgb(2, 71, 254);
+        if ((int)speed == 4) return Color.rgb(3, 146, 206);
+        if ((int)speed == 5) return Color.rgb(102, 176, 102);
+        if ((int)speed == 6) return Color.rgb(208, 234, 43);
+        if ((int)speed == 7) return Color.rgb(254, 254, 51);
+        if ((int)speed == 8) return Color.rgb(250, 188, 2);
+        if ((int)speed == 9) return Color.rgb(251, 153, 2);
+        if ((int)speed == 10) return Color.rgb(253, 83, 8);
+        if ((int)speed > 10) return Color.rgb(167, 25, 75);
+        return Color.BLUE;
     }
 
     private static int calculateMarkerDistance(int size) {

@@ -49,7 +49,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     final String TAG = "MapsActivity";
     private static GoogleMap mMap;
-    private static Context context;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
     FloatingActionButton fab, fab1, fab2, fabStart;
@@ -60,6 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean bound;
     MyReceiver myReceiver;
     TextView speedText, accuracyText;
+    Location previousLocation;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -119,7 +119,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MediaPlayer player = MediaPlayer.create(getAppContext(), R.raw.drip);
+                MediaPlayer player = MediaPlayer.create(getApplicationContext(), R.raw.drip);
                 player.start();
                 DbAsyncGetLastDay getLastDay = new DbAsyncGetLastDay(mMap);
                 getLastDay.execute();
@@ -164,7 +164,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
-        MapsActivity.context = getApplicationContext();
         mapFragment.getMapAsync(this);
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
@@ -194,8 +193,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
                 new IntentFilter(LocationService.ACTION_BROADCAST));
-        DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
-        asyncGetLastDay.execute();
+        if (mMap != null){
+            DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
+            asyncGetLastDay.execute();
+        }
     }
 
 
@@ -227,9 +228,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(getApplicationContext()));
-        getLocations.execute();
+        //Denne henter fra clouden og skal bare hentes via en knapp
+        //GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(getApplicationContext()));
+        //getLocations.execute();
+        DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
+        asyncGetLastDay.execute();
     }
 
 
@@ -274,6 +279,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void createNotificationChannel() {
         NotificationChannel serviceChannel = new NotificationChannel(CHANNEL_ID, "eksempel", NotificationManager.IMPORTANCE_LOW);
         NotificationManager manager = getSystemService(NotificationManager.class);
+        assert manager != null;
         manager.createNotificationChannel(serviceChannel);
     }
 
@@ -290,14 +296,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location location = intent.getParcelableExtra(LocationService.EXTRA_LOCATION);
             if (location != null) {
                 MapHelper.addSingleLocationToMap(mMap, location);
+                if (previousLocation != null) MapHelper.drawPolyline(mMap, previousLocation.getLatitude(), previousLocation.getLongitude(), location.getLatitude(), location.getLongitude(), location.getSpeed());
+                previousLocation = location;
                 speedText.setText(speedText(location.getSpeed()));
                 accuracyText.setText(accuracyText(location.getAccuracy()));
                 if (location.getAccuracy() < 40 && location.getAccuracy() > 0) {
                     DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, LocationStuff.getDeviceId(context), LocationStuff.isNetworkAvailable(getApplicationContext()), LocationStuff.wifiName(getApplicationContext()));
                     threadHelper.execute();
-                    MediaPlayer player = MediaPlayer.create(getAppContext(), R.raw.drip);
+                    MediaPlayer player = MediaPlayer.create(getApplicationContext(), R.raw.drip);
                     player.start();
-                    if (PreferenceHelper.getSyncOnlyOnWifi() && !LocationStuff.isOnline(getAppContext())) return;
+                    if (PreferenceHelper.getSyncOnlyOnWifi() && !LocationStuff.isOnline(getApplicationContext())) return;
                     Sender sender = new Sender("SEND", LocationStuff.getDeviceId(getApplicationContext()));
                     sender.execute();
                 }
@@ -382,18 +390,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .show();
             }
         }
-    }
-
-
-
-    public static Context getAppContext() {
-        return MapsActivity.context;
-    }
-
-
-    public static GoogleMap getMap() {
-
-        return mMap;
     }
 
     private void initiateLocationManager(){
