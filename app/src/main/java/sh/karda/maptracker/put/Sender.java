@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -22,9 +23,9 @@ public class Sender extends AsyncTask<Void, Void, String> {
     private String deviceId;
     private String action;
 
-    public Sender(String action){
+    public Sender(String action, String deviceId){
         this.action = action;
-        deviceId = MapsActivity.getDeviceId();
+        this.deviceId = deviceId;
     }
 
     @Override
@@ -63,14 +64,20 @@ public class Sender extends AsyncTask<Void, Void, String> {
     }
 
     private int markAsDeleted(String response) {
-        int i = 0;
-        Gson gson = new Gson();
-        ArrayList<String> result = gson.fromJson(response, new TypeToken<ArrayList<String>>(){}.getType());
-        for (String s: result) {
-            i++;
-            DbManager.SetRowsAsSent(s);
-        }
+        try {
+            int i = 0;
+            Gson gson = new Gson();
+            ArrayList<String> result = gson.fromJson(response, new TypeToken<ArrayList<String>>(){}.getType());
+            if (result == null) return 0;
+            for (String s: result) {
+                i++;
+                DbManager.SetRowsAsSent(s);
+            }
 
-        return i;
+            return i;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

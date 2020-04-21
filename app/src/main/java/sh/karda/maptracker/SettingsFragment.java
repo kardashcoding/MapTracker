@@ -17,7 +17,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Sender sender = new Sender("DELETE");
+                    Sender sender = new Sender("DELETE", deviceId());
                     sender.execute();
                     DbManager.Delete();
                     return true;
@@ -32,7 +32,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     DbManager.InsertAndWait(createRandomRow());
-                    Sender sender = new Sender("SEND");
+                    Sender sender = new Sender("SEND", deviceId());
                     sender.execute();
 
                     return true;
@@ -46,12 +46,17 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     DbManager.MarkAllAsUnsent();
-                    Sender sender = new Sender("SEND");
+                    Sender sender = new Sender("SEND", deviceId());
                     sender.execute();
                     return true;
                 }
             });
         }
+    }
+
+    private String deviceId(){
+        if (getContext() == null) return "unknown";
+        return LocationStuff.getDeviceId(getContext());
     }
 
     private PositionRow createRandomRow(){

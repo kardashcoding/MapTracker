@@ -2,7 +2,6 @@ package sh.karda.maptracker;
 
 import android.app.ActivityManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -11,7 +10,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -30,6 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+import sh.karda.maptracker.database.DbAsyncInsert;
+import sh.karda.maptracker.database.DbManager;
 
 import static sh.karda.maptracker.MapsActivity.KEY_REQUESTING_LOCATION_UPDATES;
 
@@ -192,7 +192,7 @@ public class LocationService extends Service {
         if (!mChangingConfiguration && requestingLocationUpdates(this)) {
             Log.i(TAG, "Starting foreground service");
 
-            startForeground(NOTIFICATION_ID, getNotification());
+            startForeground(NOTIFICATION_ID, getNotification("onUnbind"));
         }
         return true; // Ensures onRebind() is called when a client re-binds.
     }
@@ -249,8 +249,8 @@ public class LocationService extends Service {
     /**
      * Returns the {@link NotificationCompat} used as part of the foreground service.
      */
-    private Notification getNotification() {
-
+    private Notification getNotification(String cameFrom) {
+        Log.v("getNotification", cameFrom);
         Intent intent = new Intent(this, LocationService.class);
 
         CharSequence text = mLocation.getLatitude() + " : " + mLocation.getLongitude();
@@ -307,11 +307,17 @@ public class LocationService extends Service {
         Intent intent = new Intent(ACTION_BROADCAST);
         intent.putExtra(EXTRA_LOCATION, location);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        storeLocation(location);
 
         // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground(this)) {
-            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
+            mNotificationManager.notify(NOTIFICATION_ID, getNotification("onNewLocation"));
         }
+    }
+
+    public void storeLocation(Location location){
+        DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, LocationStuff.getDeviceId(this), LocationStuff.isNetworkAvailable(this), LocationStuff.wifiName(this));
+        threadHelper.execute();
     }
 
     /**

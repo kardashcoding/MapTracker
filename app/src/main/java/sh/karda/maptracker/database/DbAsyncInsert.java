@@ -17,21 +17,18 @@ public class DbAsyncInsert extends AsyncTask<Void, Void, PositionRow> {
     private String deviceId;
     private boolean gotNetwork;
     private String wifiName;
-    private GoogleMap map;
-    private PositionRow row;
 
-    public DbAsyncInsert(AppDatabase db, Location location, String deviceId, boolean networkAvailable, String wifiName, GoogleMap map) {
+    public DbAsyncInsert(AppDatabase db, Location location, String deviceId, boolean networkAvailable, String wifiName) {
         this.db = db;
         this.location = location;
         this.deviceId = deviceId;
         this.gotNetwork = networkAvailable;
         this.wifiName = wifiName;
-        this.map = MapsActivity.getMap();
     }
 
     @Override
     protected PositionRow doInBackground(Void... voids) {
-        row = locationToPositionRow(location, deviceId);
+        PositionRow row = locationToPositionRow(location, deviceId);
         db.posDao().insertRow(row);
         return null;
     }
@@ -46,6 +43,5 @@ public class DbAsyncInsert extends AsyncTask<Void, Void, PositionRow> {
     @Override
     protected void onPostExecute(PositionRow points) {
         super.onPostExecute(points);
-        MapHelper.addCurrentPositionToMap(map, row);
     }
 }

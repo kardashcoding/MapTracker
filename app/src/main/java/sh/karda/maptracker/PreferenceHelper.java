@@ -72,6 +72,16 @@ public class PreferenceHelper {
         }
     }
 
+    public static boolean drawEveryMarker(){
+        try {
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_marker", false);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     static boolean getSyncOnlyOnWifi() {
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());

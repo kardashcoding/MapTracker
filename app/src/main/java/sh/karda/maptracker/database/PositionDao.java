@@ -11,7 +11,7 @@ public interface PositionDao {
     @Query("SELECT * FROM PositionRow")
     List<PositionRow> getAllRows();
 
-    @Query("SELECT * FROM PositionRow WHERE sent = 0")
+    @Query("SELECT * FROM PositionRow WHERE sent = 0 AND date BETWEEN datetime('now', '-1 days') AND datetime('now', 'localtime')")
     List<PositionRow> getAllUnsent();
 
     @Insert
@@ -29,7 +29,7 @@ public interface PositionDao {
     @Query("SELECT COUNT(*) FROM PositionRow WHERE sent = 0")
     int unsentRows();
 
-    @Query("SELECT * FROM positionrow WHERE deleted is NULL and date BETWEEN :from AND :to")
+    @Query("SELECT * FROM positionrow WHERE deleted is NULL and date BETWEEN :from AND :to ORDER BY date asc")
     List<PositionRow> getLastDay(long from, long to);
 
     @Query("UPDATE PositionRow SET sent = 1 WHERE guid = :s")

@@ -89,4 +89,11 @@
             android:key="key_toast"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Markers">
+        <SwitchPreference app:defaultValue="false"
+            android:title="Display every marker"
+            android:key="key_marker"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

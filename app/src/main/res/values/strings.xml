@@ -59,5 +59,7 @@
     <string name="key_send_value">key_send_current</string>
     <string name="key_unsent_value">key_unsent</string>
     <string name="permission_warning">This app will not work without permissions</string>
+    <string name="map_speed_text">\"Speed: \"</string>
+    <string name="accuracy_text">\"Accuracy: \"</string>
 
 </resources>

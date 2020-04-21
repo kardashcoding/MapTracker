@@ -23,6 +23,7 @@ public class DbActivity extends AppCompatActivity {
                 .addMigrations(Migrations.MIGRATION_4_5)
                 .build();
         List<PositionRow> rows = db.posDao().getLastDay(getDay(1), getDay(0));
+        if (rows == null || rows.size() == 0) return;
         DbAdapter adapter = new DbAdapter(rows, getApplicationContext());
         listView.setAdapter(adapter);
     }
