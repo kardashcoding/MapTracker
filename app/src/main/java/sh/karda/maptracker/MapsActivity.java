@@ -23,6 +23,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.BuildConfig;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -168,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
-        initiateLocationManager();
+        initiatePreferences();
     }
 
 
@@ -396,10 +398,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return mMap;
     }
 
-    private void initiateLocationManager(){
-        //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        //requestLocation();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    private void initiatePreferences(){
+         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
 
