@@ -10,8 +10,8 @@ import androidx.preference.PreferenceManager;
 
 public class PreferenceHelper {
 
-    public static int getAccuracyFromPreferences() {
-        SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+    public static int getAccuracyFromPreferences(Context context) {
+        SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
         String accuracy = p.getString("key_accuracy", "no value found");
         if (accuracy.equals("PRIORITY_BALANCED_POWER_ACCURACY")) return LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
         if (accuracy.equals("PRIORITY_HIGH_ACCURACY")) return LocationRequest.PRIORITY_HIGH_ACCURACY;
@@ -20,8 +20,8 @@ public class PreferenceHelper {
 
         return LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
     }
-    public static int getPowerFromPreferences() {
-        SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+    public static int getPowerFromPreferences(Context context) {
+        SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
         String accuracy = p.getString("key_power", "no value found");
         if (accuracy.equals("POWER_HIGH")) return Criteria.POWER_HIGH;
         if (accuracy.equals("POWER_LOW")) return Criteria.POWER_LOW;
@@ -30,9 +30,9 @@ public class PreferenceHelper {
         return Criteria.POWER_MEDIUM;
     }
 
-    public static int getSecondsFromPreferences(){
+    public static int getSecondsFromPreferences(Context context){
         try {
-            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
             String value = p.getString("key_seconds", "5");
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
@@ -41,9 +41,9 @@ public class PreferenceHelper {
         }
     }
 
-    public static int getDistanceFromPreferences(){
+    public static int getDistanceFromPreferences(Context context){
         try {
-            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
             String value = p.getString("key_distance", "5");
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {

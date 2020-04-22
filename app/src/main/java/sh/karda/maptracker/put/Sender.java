@@ -57,9 +57,9 @@ public class Sender extends AsyncTask<Void, Void, String> {
 
         if (response != null){
             Log.v(TAG, response);
-            if (PreferenceHelper.getToastFromPreferences()) {
-                Toast.makeText(MapsActivity.getAppContext(), response, Toast.LENGTH_SHORT).show();
-            }
+            //if (PreferenceHelper.getToastFromPreferences()) {
+            //    Toast.makeText(MapsActivity.getAppContext(), response, Toast.LENGTH_SHORT).show();
+            //}
         }
     }
 

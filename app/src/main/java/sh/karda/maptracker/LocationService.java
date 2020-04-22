@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -325,18 +326,18 @@ public class LocationService extends Service {
      */
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        int interval = PreferenceHelper.getSecondsFromPreferences() * 1000;
+        int interval = PreferenceHelper.getSecondsFromPreferences(this) * 1000;
         mLocationRequest.setInterval(interval);
-        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences() * 500);
-        mLocationRequest.setPriority(PreferenceHelper.getAccuracyFromPreferences());
-        mLocationRequest.setSmallestDisplacement(PreferenceHelper.getDistanceFromPreferences());
+        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences(this) * 500);
+        mLocationRequest.setPriority(PreferenceHelper.getAccuracyFromPreferences(this ));
+        mLocationRequest.setSmallestDisplacement(PreferenceHelper.getDistanceFromPreferences(this));
     }
 
     public void updateLocationSettings(){
-        mLocationRequest.setInterval(PreferenceHelper.getSecondsFromPreferences() * 1000);
-        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences() * 500);
-        mLocationRequest.setPriority(PreferenceHelper.getAccuracyFromPreferences());
-        mLocationRequest.setSmallestDisplacement(PreferenceHelper.getDistanceFromPreferences());
+        mLocationRequest.setInterval(PreferenceHelper.getSecondsFromPreferences(this) * 1000);
+        mLocationRequest.setFastestInterval(PreferenceHelper.getSecondsFromPreferences(this) * 500);
+        mLocationRequest.setPriority(PreferenceHelper.getAccuracyFromPreferences(this));
+        mLocationRequest.setSmallestDisplacement(PreferenceHelper.getDistanceFromPreferences(this));
     }
 
     /**

@@ -46,6 +46,7 @@ import static sh.karda.maptracker.LocationService.CHANNEL_ID;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static Context context;
     final String TAG = "MapsActivity";
     private static GoogleMap mMap;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -75,6 +76,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     };
 
+    public static Context getAppContext() {
+        return context;
+    }
 
 
     @Override
@@ -83,6 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myReceiver = new MyReceiver();
         createNotificationChannel();
         setContentView(R.layout.activity_maps);
+        context = getApplicationContext();
+
 
         speedText = findViewById(R.id.text_speed);
         accuracyText = findViewById(R.id.text_accuracy);
@@ -185,6 +191,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         setButtonsState(requestingLocationUpdates(this));
+        context = getApplicationContext();
     }
 
     @Override
