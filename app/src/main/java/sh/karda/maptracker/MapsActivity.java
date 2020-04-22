@@ -38,6 +38,7 @@ import sh.karda.maptracker.database.DbActivity;
 import sh.karda.maptracker.database.DbAsyncGetLastDay;
 import sh.karda.maptracker.database.DbAsyncInsert;
 import sh.karda.maptracker.database.DbManager;
+import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.map.PopupAdapter;
 import sh.karda.maptracker.put.Sender;
@@ -51,7 +52,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static GoogleMap mMap;
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
-    FloatingActionButton fab, fab1, fab2, fabStart;
+    FloatingActionButton fabMain, fabProperties, fabRefresh, fabStart, fabCloud;
     boolean hasStarted = false;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
@@ -93,22 +94,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         speedText = findViewById(R.id.text_speed);
         accuracyText = findViewById(R.id.text_accuracy);
 
-        fab = findViewById(R.id.floatingActionButton);
-        fab1 = findViewById(R.id.fab1);
-        fab2 = findViewById(R.id.fab2);
+        fabMain = findViewById(R.id.fabMain);
+        fabProperties = findViewById(R.id.fabProperties);
+        fabRefresh = findViewById(R.id.fabRefresh);
+        fabCloud = findViewById(R.id.fabCloud);
         fabStart = findViewById(R.id.fab_start);
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
         rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        fabMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 animateFab();
             }
         });
-        fab1.setOnClickListener(new View.OnClickListener() {
+        fabProperties.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!checkPermissions()) {
@@ -121,7 +123,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 animateFab();
             }
         });
-        fab2.setOnClickListener(new View.OnClickListener() {
+        fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MediaPlayer player = MediaPlayer.create(getApplicationContext(), R.raw.drip);
@@ -132,12 +134,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        fab2.setOnLongClickListener(new View.OnLongClickListener() {
+        fabRefresh.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), DbActivity.class);
                 startActivity(intent);
                 return false;
+            }
+        });
+
+        fabCloud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(getApplicationContext()));
+                getLocations.execute();
+                animateFab();
+            }
+        });
+
+        fabCloud.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Sender sender = new Sender("SEND", LocationStuff.getDeviceId(getApplicationContext()));
+                sender.execute();
+                animateFab();
+                Toast.makeText(getApplicationContext(), "Sending locations to cloud", Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
 
@@ -184,11 +206,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .registerOnSharedPreferenceChangeListener(this);
         if (locationService != null) locationService.requestLocationUpdates();
         if (mMap == null) return;
-        if (!PreferenceHelper.getDownloadAutomatically()){
-            // Denne skal bare kjøres når man ønsker cloud data
-            //GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(this));
-            //getLocations.execute();
-        }
 
         setButtonsState(requestingLocationUpdates(this));
         context = getApplicationContext();
@@ -236,9 +253,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        //Denne henter fra clouden og skal bare hentes via en knapp
-        //GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(getApplicationContext()));
-        //getLocations.execute();
         DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
         asyncGetLastDay.execute();
     }
@@ -306,15 +320,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 previousLocation = location;
                 speedText.setText(speedText(location.getSpeed()));
                 accuracyText.setText(accuracyText(location.getAccuracy()));
-                if (location.getAccuracy() < 40 && location.getAccuracy() > 0) {
-                    DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, LocationStuff.getDeviceId(context), LocationStuff.isNetworkAvailable(getApplicationContext()), LocationStuff.wifiName(getApplicationContext()));
-                    threadHelper.execute();
-                    MediaPlayer player = MediaPlayer.create(getApplicationContext(), R.raw.drip);
-                    player.start();
-                    if (PreferenceHelper.getSyncOnlyOnWifi() && !LocationStuff.isOnline(getApplicationContext())) return;
-                    Sender sender = new Sender("SEND", LocationStuff.getDeviceId(getApplicationContext()));
-                    sender.execute();
-                }
+                LocationStuff.storeLocation(location, getApplicationContext());
             }
         }
 
@@ -338,22 +344,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void animateFab(){
         if (isOpen){
-            fab.startAnimation(rotateForward);
-            fab1.startAnimation(fabClose);
-            fab2.startAnimation(fabClose);
+            fabMain.startAnimation(rotateForward);
+            fabProperties.startAnimation(fabClose);
+            fabRefresh.startAnimation(fabClose);
             fabStart.startAnimation(fabClose);
-            fab1.setClickable(false);
-            fab2.setClickable(false);
+            fabCloud.startAnimation(fabClose);
+            fabProperties.setClickable(false);
+            fabRefresh.setClickable(false);
+            fabCloud.setClickable(false);
             fabStart.setClickable(false);
             isOpen = false;
 
         }else{
-            fab.startAnimation(rotateBackward);
-            fab1.startAnimation(fabOpen);
-            fab2.startAnimation(fabOpen);
+            fabMain.startAnimation(rotateBackward);
+            fabProperties.startAnimation(fabOpen);
+            fabRefresh.startAnimation(fabOpen);
+            fabCloud.startAnimation(fabOpen);
             fabStart.startAnimation(fabOpen);
-            fab1.setClickable(true);
-            fab2.setClickable(true);
+            fabProperties.setClickable(true);
+            fabRefresh.setClickable(true);
+            fabCloud.setClickable(true);
             fabStart.setClickable(true);
             isOpen = true;
         }

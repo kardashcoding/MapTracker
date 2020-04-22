@@ -308,17 +308,12 @@ public class LocationService extends Service {
         Intent intent = new Intent(ACTION_BROADCAST);
         intent.putExtra(EXTRA_LOCATION, location);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-        storeLocation(location);
+        LocationStuff.storeLocation(location, this);
 
         // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground(this)) {
             mNotificationManager.notify(NOTIFICATION_ID, getNotification("onNewLocation"));
         }
-    }
-
-    public void storeLocation(Location location){
-        DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, LocationStuff.getDeviceId(this), LocationStuff.isNetworkAvailable(this), LocationStuff.wifiName(this));
-        threadHelper.execute();
     }
 
     /**

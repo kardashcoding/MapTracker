@@ -30,60 +30,54 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_gravity="bottom|start"
-        android:layout_margin="16dp">
+        android:layout_margin="3dp">
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
+            android:id="@+id/fabMain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="10dp"
             android:clickable="true"
             android:src="@drawable/ic_launch" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_marginEnd="100dp"
-            android:layout_marginStart="100dp"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="90dp"
-            android:clickable="true"
-            android:src="@drawable/ic_option"
-            android:visibility="invisible"
-            app:layout_anchor="@id/floatingActionButton"
-            app:layout_anchorGravity="bottom"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_marginEnd="100dp"
-            android:layout_marginStart="100dp"
             android:layout_gravity="bottom|end"
-            android:layout_marginBottom="90dp"
             android:clickable="true"
             android:src="@drawable/ic_start"
             android:visibility="invisible"
-            app:layout_anchor="@id/floatingActionButton"
             app:layout_anchorGravity="bottom"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab2"
+            android:id="@+id/fabRefresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="10dp"
-            android:layout_marginStart="200dp"
-            android:layout_marginEnd="200dp"
-            android:layout_marginBottom="300dp"
             android:clickable="true"
             android:src="@drawable/ic_action_refresh"
             android:visibility="invisible"
-            app:layout_anchor="@id/fab1"
             app:layout_anchorGravity="top"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabCloud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:clickable="true"
+            android:src="@drawable/ic_action_cloud"
+            android:visibility="invisible"
+            app:layout_anchorGravity="top" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabProperties"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:clickable="true"
+            android:src="@drawable/ic_option"
+            android:visibility="invisible"
+            app:layout_anchorGravity="bottom"/>
     </LinearLayout>
 
 </FrameLayout>

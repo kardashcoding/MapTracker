@@ -87,4 +87,16 @@ public class DbManager {
             e.printStackTrace();
         }
     }
+
+    public static long getYesterday() {
+        final Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        return cal.getTimeInMillis();
+    }
+
+    public static long getToday() {
+        final Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, 0);
+        return cal.getTimeInMillis();
+    }
 }

@@ -11,8 +11,8 @@ public interface PositionDao {
     @Query("SELECT * FROM PositionRow")
     List<PositionRow> getAllRows();
 
-    @Query("SELECT * FROM PositionRow WHERE sent = 0 AND date BETWEEN datetime('now', '-1 days') AND datetime('now', 'localtime')")
-    List<PositionRow> getAllUnsent();
+    @Query("SELECT * FROM PositionRow WHERE sent = 0 AND date BETWEEN :from AND :to ORDER BY date ASC")
+    List<PositionRow> getAllUnsent(long from, long to);
 
     @Insert
     void insertAll(PositionRow... rows);

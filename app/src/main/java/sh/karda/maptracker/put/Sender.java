@@ -1,6 +1,6 @@
 package sh.karda.maptracker.put;
 
-import android.location.Location;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,9 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import sh.karda.maptracker.MapsActivity;
 import sh.karda.maptracker.PreferenceHelper;
-import sh.karda.maptracker.database.AppDatabase;
 import sh.karda.maptracker.database.DbManager;
 
 public class Sender extends AsyncTask<Void, Void, String> {
@@ -54,12 +52,8 @@ public class Sender extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(String response){
         super.onPostExecute(response);
-
         if (response != null){
             Log.v(TAG, response);
-            //if (PreferenceHelper.getToastFromPreferences()) {
-            //    Toast.makeText(MapsActivity.getAppContext(), response, Toast.LENGTH_SHORT).show();
-            //}
         }
     }
 
