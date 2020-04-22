@@ -23,12 +23,12 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.android.volley.BuildConfig;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -38,7 +38,6 @@ import sh.karda.maptracker.database.DbActivity;
 import sh.karda.maptracker.database.DbAsyncGetLastDay;
 import sh.karda.maptracker.database.DbAsyncInsert;
 import sh.karda.maptracker.database.DbManager;
-import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.map.PopupAdapter;
 import sh.karda.maptracker.put.Sender;
@@ -167,7 +166,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
 
-        initiateLocationManager();
+        initiatePreferences();
     }
 
 
@@ -392,7 +391,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void initiateLocationManager(){
+    private void initiatePreferences(){
         //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         //requestLocation();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
