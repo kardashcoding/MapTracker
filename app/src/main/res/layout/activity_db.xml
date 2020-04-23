@@ -8,11 +8,14 @@
     tools:context=".database.DbActivity">
 
 
-    <ListView
-        android:id="@+id/list"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="4dp"
+        android:scrollbars="vertical"
+        android:background="@android:color/darker_gray"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

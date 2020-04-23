@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="4dp"
+    app:cardUseCompatPadding="true"
+    app:cardPreventCornerOverlap="false"
+    android:padding="1dp"
+    app:cardMaxElevation="2dp"
+    app:cardElevation="1dp"
+    android:paddingBottom="3dp"
+    android:id="@+id/card"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="4dp"
+        android:paddingBottom="6dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -19,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/string_date"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@android:color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
             <TextView
@@ -28,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/time_string"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@android:color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
         </LinearLayout>
@@ -38,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/wifi_string"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@android:color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
         <LinearLayout
@@ -51,7 +63,7 @@
                 android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:text="@string/accuracy_string"
-                android:textColor="@android:color/secondary_text_dark"
+                android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
             <TextView
@@ -59,10 +71,8 @@
                 android:layout_width="160sp"
                 android:layout_height="wrap_content"
                 android:text="@string/accuracy_string"
-                android:textColor="@android:color/secondary_text_dark"
+                android:textColor="@android:color/black"
                 android:textSize="16sp" />
-
-
         </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -118,4 +128,4 @@
     </LinearLayout>
 
 
-</RelativeLayout>
+</androidx.cardview.widget.CardView>

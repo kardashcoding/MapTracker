@@ -65,6 +65,7 @@ public class Sender extends AsyncTask<Void, Void, String> {
             if (result == null) return 0;
             for (String s: result) {
                 i++;
+                if (s.startsWith("Exists:")) s = s.replace("Exists:", "");
                 DbManager.SetRowsAsSent(s);
             }
 
