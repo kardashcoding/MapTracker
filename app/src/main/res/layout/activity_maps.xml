@@ -37,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:clickable="true"
-            android:src="@drawable/ic_launch" />
+            android:src="@drawable/ic_launch"
+            android:tooltipText="Klikk her! "/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_start"

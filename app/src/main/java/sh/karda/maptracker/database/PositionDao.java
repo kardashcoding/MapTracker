@@ -32,8 +32,11 @@ public interface PositionDao {
     @Query("SELECT * FROM positionrow WHERE deleted is NULL and date BETWEEN :from AND :to ORDER BY date asc")
     List<PositionRow> getLastDay(long from, long to);
 
+    @Query("UPDATE PositionRow SET sent = 1 WHERE guid IN (:s)")
+    int setRowsAsSent(ArrayList<String> s);
+
     @Query("UPDATE PositionRow SET sent = 1 WHERE guid = :s")
-    int setRowsAsSent(String s);
+    int setRowAsSent(String s);
 
     @Query("UPDATE PositionRow SET deleted = :now, sent = 0")
     void deleteAllRows(String now);

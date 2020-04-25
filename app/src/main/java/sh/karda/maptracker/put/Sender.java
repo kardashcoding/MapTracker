@@ -63,11 +63,16 @@ public class Sender extends AsyncTask<Void, Void, String> {
             Gson gson = new Gson();
             ArrayList<String> result = gson.fromJson(response, new TypeToken<ArrayList<String>>(){}.getType());
             if (result == null) return 0;
+            ArrayList<String> guidList = new ArrayList<>();
             for (String s: result) {
                 i++;
-                if (s.startsWith("Exists:")) s = s.replace("Exists:", "");
-                DbManager.SetRowsAsSent(s);
+                if (s.startsWith("Exists:")) {
+                    Log.v(TAG, "Oh shit, her hadde vi en som eksisterte" + s);
+                    s = s.replace("Exists:", "");
+                }
+                guidList.add(s);
             }
+            DbManager.SetRowAsSent(guidList);
 
             return i;
         } catch (JsonSyntaxException e) {

@@ -1,11 +1,14 @@
 package sh.karda.maptracker.database;
 
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
 
 import sh.karda.maptracker.MapsActivity;
+import sh.karda.maptracker.PreferenceHelper;
+import sh.karda.maptracker.R;
 import sh.karda.maptracker.dto.Positions;
 import sh.karda.maptracker.map.MapHelper;
 
@@ -43,5 +46,9 @@ public class DbAsyncInsert extends AsyncTask<Void, Void, PositionRow> {
     @Override
     protected void onPostExecute(PositionRow points) {
         super.onPostExecute(points);
+        if (MapsActivity.getAppContext() != null && PreferenceHelper.getPlaySoundFromPreferences()){
+            MediaPlayer player = MediaPlayer.create(MapsActivity.getAppContext(), R.raw.drip);
+            player.start();
+        }
     }
 }

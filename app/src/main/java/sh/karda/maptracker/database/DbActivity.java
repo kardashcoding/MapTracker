@@ -22,7 +22,7 @@ public class DbActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         manager = new LinearLayoutManager(this);
 
-        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "production")
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "location")
                 .allowMainThreadQueries()
                 .addMigrations(Migrations.MIGRATION_4_5)
                 .build();

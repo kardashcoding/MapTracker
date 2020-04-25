@@ -25,7 +25,7 @@ class PutRequest {
     private static String getJsonFromDb(){
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonUTCDateAdapter()).create();
 
-        List<PositionRow> items = DbManager.getDbInstance().posDao().getAllUnsent(DbManager.getYesterday(), DbManager.getToday());
+        List<PositionRow> items = DbManager.getDbInstance().posDao().getAllUnsent(DbManager.getMonthAgo(), DbManager.getToday());
         if (items.size() == 0) return "";
 
         itemsSent = items.size();

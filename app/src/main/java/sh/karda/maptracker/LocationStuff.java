@@ -22,8 +22,7 @@ class LocationStuff {
             Log.v(TAG, "Storing location");
             DbAsyncInsert threadHelper = new DbAsyncInsert(DbManager.getDbInstance(), location, LocationStuff.getDeviceId(context), LocationStuff.isNetworkAvailable(context), LocationStuff.wifiName(context));
             threadHelper.execute();
-            MediaPlayer player = MediaPlayer.create(context, R.raw.drip);
-            player.start();
+
             if (PreferenceHelper.getSyncOnlyOnWifi() && !LocationStuff.isOnline(context)) return;
             Sender sender = new Sender("SEND", LocationStuff.getDeviceId(context));
             sender.execute();

@@ -12,7 +12,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -23,12 +22,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.volley.BuildConfig;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -36,8 +37,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 import sh.karda.maptracker.database.DbActivity;
 import sh.karda.maptracker.database.DbAsyncGetLastDay;
-import sh.karda.maptracker.database.DbAsyncInsert;
-import sh.karda.maptracker.database.DbManager;
 import sh.karda.maptracker.get.GetLocations;
 import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.map.PopupAdapter;
@@ -110,6 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 animateFab();
             }
         });
+        fabMain.setTooltipText("Klikk her for faen!");
         fabProperties.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,8 +126,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fabRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MediaPlayer player = MediaPlayer.create(getApplicationContext(), R.raw.drip);
-                player.start();
                 DbAsyncGetLastDay getLastDay = new DbAsyncGetLastDay(mMap);
                 getLastDay.execute();
                 animateFab();
@@ -251,7 +249,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
         DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
         asyncGetLastDay.execute();
@@ -381,6 +378,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission was granted.
+                mMap.setMyLocationEnabled(true);
                 locationService.requestLocationUpdates();
             } else {
                 // Permission denied.

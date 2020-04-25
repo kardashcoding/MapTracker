@@ -62,6 +62,26 @@ public class PreferenceHelper {
         }
     }
 
+    public static boolean getDisplayEveryMarkerFromPreferences(){
+        try{
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_marker", false);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean getPlaySoundFromPreferences(){
+        try{
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_sound", false);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     static boolean getDrawLinesFromPreferences(){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());

@@ -42,7 +42,7 @@ public class DbManager {
         t.start();
     }
 
-    public static void SetRowsAsSent(final String guid){
+    public static void SetRowAsSent(final ArrayList<String> guid){
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -54,7 +54,7 @@ public class DbManager {
 
     public static AppDatabase getDbInstance(){
         if (db != null) return db;
-        return db = Room.databaseBuilder(MapsActivity.getAppContext(), AppDatabase.class, "production")
+        return db = Room.databaseBuilder(MapsActivity.getAppContext(), AppDatabase.class, "location")
                 .addMigrations(Migrations.MIGRATION_4_5)
                 .allowMainThreadQueries()
                 .build();
@@ -91,6 +91,12 @@ public class DbManager {
     public static long getYesterday() {
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -1);
+        return cal.getTimeInMillis();
+    }
+
+    public static long getMonthAgo() {
+        final Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -60);
         return cal.getTimeInMillis();
     }
 

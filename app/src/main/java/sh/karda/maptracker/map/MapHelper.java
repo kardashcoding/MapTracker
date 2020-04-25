@@ -44,7 +44,7 @@ public class MapHelper {
                         .title(item.getTime())
                         .snippet(item.getSnippet())
                         .icon(BitmapDescriptorFactory.defaultMarker(item.getSpeedColor()));
-                if (delta == 0){
+                if (delta == 0 || PreferenceHelper.getDisplayEveryMarkerFromPreferences()){
                     map.addMarker(markerOptions);
                 }else{
                     if (prev != null){

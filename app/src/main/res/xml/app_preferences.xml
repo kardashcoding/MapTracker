@@ -87,6 +87,11 @@
             android:title="Toast"
             android:summary="Display info in toast"
             android:key="key_toast"/>
+
+        <SwitchPreference app:defaultValue="false"
+            android:title="Volume"
+            android:summary="Play sound for every position"
+            android:key="key_sound"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Markers">
