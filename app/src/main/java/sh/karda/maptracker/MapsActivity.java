@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +31,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -52,6 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
     FloatingActionButton fabMain, fabProperties, fabRefresh, fabStart, fabCloud;
+    NumberPicker numberPicker;
     boolean hasStarted = false;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
@@ -60,6 +65,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     MyReceiver myReceiver;
     TextView speedText, accuracyText;
     Location previousLocation;
+
+    private BroadcastReceiver wifiStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int wifiStateExtra = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+            if (wifiStateExtra == WifiManager.WIFI_STATE_ENABLED){
+                Toast.makeText(MapsActivity.this, "Got Wifi", Toast.LENGTH_SHORT).show();
+                Variables.setLastUsedMinSeconds(PreferenceHelper.getSecondsFromPreferences(context));
+                Variables.setLastUsedMinDistance(PreferenceHelper.getSecondsFromPreferences(context));
+                updateSettings(30, 100);
+            }
+            if (wifiStateExtra == WifiManager.WIFI_STATE_DISABLED){
+                Toast.makeText(MapsActivity.this, "Lost Wifi", Toast.LENGTH_SHORT).show();
+                updateSettings(Variables.getLastUsedMinSeconds(), Variables.getLastUsedMinDistance());
+            }
+        }
+
+        private void updateSettings(int seconds, int distance) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = settings.edit();
+            Map<String, ?> all = settings.getAll();
+            editor.putString("key_min_seconds", String.valueOf(seconds));
+            editor.apply();
+            editor.putString("key_min_distance", String.valueOf(distance));
+            editor.apply();
+        }
+    };
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -84,105 +116,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        IntentFilter intentFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        registerReceiver(wifiStateReceiver, intentFilter);
         myReceiver = new MyReceiver();
         createNotificationChannel();
         setContentView(R.layout.activity_maps);
         context = getApplicationContext();
-
-
-        speedText = findViewById(R.id.text_speed);
-        accuracyText = findViewById(R.id.text_accuracy);
-
-        fabMain = findViewById(R.id.fabMain);
-        fabProperties = findViewById(R.id.fabProperties);
-        fabRefresh = findViewById(R.id.fabRefresh);
-        fabCloud = findViewById(R.id.fabCloud);
-        fabStart = findViewById(R.id.fab_start);
-        fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
-        fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
-        rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
-        rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
-
-        fabMain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animateFab();
-            }
-        });
-        fabMain.setTooltipText("Klikk her for faen!");
-        fabProperties.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!checkPermissions()) {
-                    requestPermissions();
-                } else {
-                    locationService.requestLocationUpdates();
-                }
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
-                animateFab();
-            }
-        });
-        fabRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DbAsyncGetLastDay getLastDay = new DbAsyncGetLastDay(mMap);
-                getLastDay.execute();
-                animateFab();
-            }
-        });
-
-        fabRefresh.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), DbActivity.class);
-                startActivity(intent);
-                return false;
-            }
-        });
-
-        fabCloud.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(getApplicationContext()));
-                getLocations.execute();
-                animateFab();
-            }
-        });
-
-        fabCloud.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Sender sender = new Sender("SEND", LocationStuff.getDeviceId(getApplicationContext()));
-                sender.execute();
-                animateFab();
-                Toast.makeText(getApplicationContext(), "Sending locations to cloud", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-
-        fabStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (hasStarted){
-                    locationService.removeLocationUpdates();
-                    setButtonsState(false);
-                    animateFab();
-                    Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
-                    speedText.setText("");
-                    accuracyText.setText("");
-                }else{
-                    if (!checkPermissions()) {
-                        requestPermissions();
-                    } else {
-                        locationService.requestLocationUpdates();
-                        setButtonsState(true);
-                        animateFab();
-                        Toast.makeText(getApplicationContext(), "Started", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        });
+        initializeControls();
+        initiatePreferences(getApplicationContext());
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -191,10 +132,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, true);
-
-        initiatePreferences();
     }
-
 
     @Override
     public void onStart() {
@@ -250,8 +188,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
-        asyncGetLastDay.execute();
+        numberPicker.setValue(3);
     }
 
 
@@ -339,34 +276,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void animateFab(){
-        if (isOpen){
-            fabMain.startAnimation(rotateForward);
-            fabProperties.startAnimation(fabClose);
-            fabRefresh.startAnimation(fabClose);
-            fabStart.startAnimation(fabClose);
-            fabCloud.startAnimation(fabClose);
-            fabProperties.setClickable(false);
-            fabRefresh.setClickable(false);
-            fabCloud.setClickable(false);
-            fabStart.setClickable(false);
-            isOpen = false;
-
-        }else{
-            fabMain.startAnimation(rotateBackward);
-            fabProperties.startAnimation(fabOpen);
-            fabRefresh.startAnimation(fabOpen);
-            fabCloud.startAnimation(fabOpen);
-            fabStart.startAnimation(fabOpen);
-            fabProperties.setClickable(true);
-            fabRefresh.setClickable(true);
-            fabCloud.setClickable(true);
-            fabStart.setClickable(true);
-            isOpen = true;
-        }
-    }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -406,30 +315,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void initiatePreferences(){
-        //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        //requestLocation();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    private void initiatePreferences(Context context){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        Variables.setLastUsedMinDistance(PreferenceHelper.getDistanceFromPreferences(context));
+        Variables.setLastUsedMinSeconds(PreferenceHelper.getSecondsFromPreferences(context));
     }
 
     SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (locationService == null) return;
+            locationService.updateLocationSettings();
+
+            if (!PreferenceHelper.getToastFromPreferences()) return;
             if (key.equals("key_power")) {
-                Toast.makeText(getApplicationContext(), "Power satt til " + sharedPreferences.getString("key_power", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Power set to " + sharedPreferences.getString("key_power", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
             if (key.equals("key_accuracy")) {
-                Toast.makeText(getApplicationContext(), "Accuracy satt til " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Accuracy set to " + sharedPreferences.getString("key_accuracy", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
-            if (key.equals("key_seconds")) {
-                Toast.makeText(getApplicationContext(), "Seconds satt til " + sharedPreferences.getString("key_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+            if (key.equals("key_min_seconds")) {
+                String seconds = sharedPreferences.getString("key_min_seconds", "7");
+                Variables.setLastUsedMinSeconds(Integer.parseInt(seconds));
+                Toast.makeText(getApplicationContext(), "Seconds set to " + sharedPreferences.getString("key_min_seconds", "<shit føkk>"), Toast.LENGTH_SHORT).show();
             }
-            if (key.equals("key_distance")) {
-                Toast.makeText(getApplicationContext(), "Distance satt til " + sharedPreferences.getString("key_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+            if (key.equals("key_min_distance")) {
+                Toast.makeText(getApplicationContext(), "Distance set to " + sharedPreferences.getString("key_min_distance", "<shit føkk>"), Toast.LENGTH_SHORT).show();
+                String seconds = sharedPreferences.getString("key_min_distance", "8");
+                Variables.setLastUsedMinDistance(Integer.parseInt(seconds));
             }
-            locationService.updateLocationSettings();
         }
     };
 
@@ -445,6 +360,148 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             fabStart.setImageResource(R.drawable.ic_start);
             hasStarted = false;
+        }
+    }
+
+    private void initializeControls() {
+        speedText = findViewById(R.id.text_speed);
+        accuracyText = findViewById(R.id.text_accuracy);
+        numberPicker = findViewById(R.id.numberPicker);
+        numberPicker.setDisplayedValues(Variables.numberPickerValues);
+        NumberPicker.OnValueChangeListener numberPickerListener = new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                Toast.makeText(getApplicationContext(), Variables.numberPickerValues[picker.getValue() - 1], Toast.LENGTH_SHORT).show();
+                Variables.setFromTime(Variables.numberPickerValues[picker.getValue() - 1]);
+                DbAsyncGetLastDay asyncGetLastDay = new DbAsyncGetLastDay(mMap);
+                asyncGetLastDay.execute();
+            }
+        };
+        numberPicker.setOnValueChangedListener(numberPickerListener);
+        numberPicker.setSoundEffectsEnabled(true);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(5);
+
+        fabMain = findViewById(R.id.fabMain);
+        fabProperties = findViewById(R.id.fabProperties);
+        fabRefresh = findViewById(R.id.fabRefresh);
+        fabCloud = findViewById(R.id.fabCloud);
+        fabStart = findViewById(R.id.fab_start);
+        fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+        rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
+        rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
+
+        fabMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateFab();
+            }
+        });
+        fabMain.setTooltipText("Klikk her for faen!");
+        fabProperties.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!checkPermissions()) {
+                    requestPermissions();
+                } else {
+                    locationService.requestLocationUpdates();
+                }
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                animateFab();
+            }
+        });
+        fabRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DbAsyncGetLastDay getLastDay = new DbAsyncGetLastDay(mMap);
+                getLastDay.execute();
+                animateFab();
+            }
+        });
+
+        fabRefresh.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), DbActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+
+        fabCloud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GetLocations getLocations = new GetLocations(mMap, LocationStuff.getDeviceId(getApplicationContext()));
+                getLocations.execute();
+                animateFab();
+            }
+        });
+
+        if (PreferenceHelper.getUseCloudWifi()){
+            fabCloud.setEnabled(false);
+        }else{
+            fabCloud.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Sender sender = new Sender("SEND", LocationStuff.getDeviceId(getApplicationContext()));
+                    sender.execute();
+                    animateFab();
+                    Toast.makeText(getApplicationContext(), "Sending locations to cloud", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+        }
+
+
+        fabStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasStarted){
+                    locationService.removeLocationUpdates();
+                    setButtonsState(false);
+                    animateFab();
+                    Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
+                    speedText.setText("");
+                    accuracyText.setText("");
+                }else{
+                    if (!checkPermissions()) {
+                        requestPermissions();
+                    } else {
+                        locationService.requestLocationUpdates();
+                        setButtonsState(true);
+                        animateFab();
+                        Toast.makeText(getApplicationContext(), "Started", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+    }
+    private void animateFab(){
+        if (isOpen){
+            fabMain.startAnimation(rotateForward);
+            fabProperties.startAnimation(fabClose);
+            fabRefresh.startAnimation(fabClose);
+            fabStart.startAnimation(fabClose);
+            fabCloud.startAnimation(fabClose);
+            fabProperties.setClickable(false);
+            fabRefresh.setClickable(false);
+            fabCloud.setClickable(false);
+            fabStart.setClickable(false);
+            isOpen = false;
+
+        }else{
+            fabMain.startAnimation(rotateBackward);
+            fabProperties.startAnimation(fabOpen);
+            fabRefresh.startAnimation(fabOpen);
+            fabCloud.startAnimation(fabOpen);
+            fabStart.startAnimation(fabOpen);
+            fabProperties.setClickable(true);
+            fabRefresh.setClickable(true);
+            fabCloud.setClickable(true);
+            fabStart.setClickable(true);
+            isOpen = true;
         }
     }
 }

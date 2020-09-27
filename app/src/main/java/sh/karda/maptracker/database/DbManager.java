@@ -56,6 +56,7 @@ public class DbManager {
         if (db != null) return db;
         return db = Room.databaseBuilder(MapsActivity.getAppContext(), AppDatabase.class, "location")
                 .addMigrations(Migrations.MIGRATION_4_5)
+                .addMigrations(Migrations.MIGRATION_5_6)
                 .allowMainThreadQueries()
                 .build();
     }

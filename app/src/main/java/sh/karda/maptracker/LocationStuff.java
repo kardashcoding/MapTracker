@@ -16,6 +16,7 @@ import sh.karda.maptracker.put.Sender;
 
 class LocationStuff {
     private static final String TAG = "LocationStuff";
+    private static Location prevLocation;
 
     static void storeLocation(Location location, Context context){
         if (location.getAccuracy() < 40 && location.getAccuracy() > 0) {
@@ -24,6 +25,7 @@ class LocationStuff {
             threadHelper.execute();
 
             if (PreferenceHelper.getSyncOnlyOnWifi() && !LocationStuff.isOnline(context)) return;
+            if (!PreferenceHelper.getUseCloudWifi()) return;
             Sender sender = new Sender("SEND", LocationStuff.getDeviceId(context));
             sender.execute();
         }

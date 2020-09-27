@@ -8,6 +8,9 @@ import com.google.android.gms.maps.GoogleMap;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.xml.validation.Validator;
+
+import sh.karda.maptracker.Variables;
 import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
 import sh.karda.maptracker.map.MapHelper;
@@ -25,7 +28,7 @@ public class DbAsyncGetLastDay extends AsyncTask<Void, Void, Positions> {
 
     @Override
     protected Positions doInBackground(Void... voids) {
-        List<PositionRow> rows = DbManager.getDbInstance().posDao().getLastDay(getDay(1), getDay(0));
+        List<PositionRow> rows = DbManager.getDbInstance().posDao().getLastDay(Variables.getFromTime(), Variables.getNow());
         points = new Positions();
         for (PositionRow row: rows) {
             points.points.add(new Point(row.getAccuracy(), row.isConnectedToWifi(), row.getDate(), row.getDevice(), row.getGuid(), row.getHeight(), row.getId(), row.getLatitude(), row.getLongitude(), row.getSpeed(), row.getWifi(), row.getDeleted()));

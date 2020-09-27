@@ -254,9 +254,6 @@ public class LocationService extends Service {
         Log.v("getNotification", cameFrom);
         Intent intent = new Intent(this, LocationService.class);
 
-        CharSequence text = mLocation.getLatitude() + " : " + mLocation.getLongitude();
-
-        // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
         intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
         // The PendingIntent that leads to a call to onStartCommand() in this service.
@@ -267,13 +264,12 @@ public class LocationService extends Service {
                 new Intent(this, MapsActivity.class), 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "kardash")
-                .addAction(R.drawable.ic_launch, getString(R.string.launch_activity),
+                .addAction(R.drawable.ic_start, getString(R.string.launch_activity),
                         activityPendingIntent)
-                .addAction(R.drawable.ic_cancel, getString(R.string.remove_location_updates),
+                .addAction(R.drawable.ic_pause, getString(R.string.remove_location_updates),
                         servicePendingIntent)
-                .setContentText(text)
                 .setContentTitle("Currently tracking your location")
-                .setSmallIcon(R.mipmap.ic_launcher);
+                .setSmallIcon(R.drawable.ic_location_notification);
 
         // Set the Channel ID for Android O.
         builder.setChannelId(CHANNEL_ID); // Channel ID

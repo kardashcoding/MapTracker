@@ -25,6 +25,7 @@ public class DbActivity extends AppCompatActivity {
         AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "location")
                 .allowMainThreadQueries()
                 .addMigrations(Migrations.MIGRATION_4_5)
+                .addMigrations(Migrations.MIGRATION_5_6)
                 .build();
         List<PositionRow> rows = db.posDao().getLastDay(getDay(1), getDay(0));
         if (rows == null || rows.size() == 0) return;

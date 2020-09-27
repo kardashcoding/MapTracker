@@ -11,4 +11,12 @@ public class Migrations {
                     + " ADD COLUMN deleted TEXT");
         }
     };
+
+    public static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE PositionRow "
+                    + " ADD COLUMN distance REAL");
+        }
+    };
 }

@@ -1,9 +1,7 @@
 package sh.karda.maptracker.put;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -12,7 +10,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import sh.karda.maptracker.PreferenceHelper;
 import sh.karda.maptracker.database.DbManager;
 
 public class Sender extends AsyncTask<Void, Void, String> {

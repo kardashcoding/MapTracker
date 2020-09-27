@@ -28,6 +28,9 @@ public class PositionRow {
     @ColumnInfo(name = "accuracy")
     private float accuracy;
 
+    @ColumnInfo(name = "distance")
+    private float distance;
+
     @ColumnInfo(name = "height")
     private double height;
 
@@ -48,7 +51,7 @@ public class PositionRow {
 
     public boolean sent;
 
-    public PositionRow(String guid, String device, double longitude, double latitude, float accuracy, double height, float speed, Date date, String wifi, String deleted, boolean connectedToWifi) {
+    public PositionRow(String guid, String device, double longitude, double latitude, float accuracy, float distance, double height, float speed, Date date, String wifi, String deleted, boolean connectedToWifi) {
         this.guid = guid;
         this.device = device;
         this.longitude = longitude;
@@ -61,6 +64,7 @@ public class PositionRow {
         this.deleted = deleted;
         this.connectedToWifi = connectedToWifi;
         this.sent = false;
+        this.distance = distance;
     }
 
     public String getGuid() {

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
 import sh.karda.maptracker.PreferenceHelper;
 import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
@@ -28,52 +29,97 @@ public class MapHelper {
         try {
             if (map == null || points == null || points.points == null || points.points.size() == 0) return;
 
-            boolean drawLines = PreferenceHelper.getDownloadAutomatically();
-            Point prev = null;
-            long deltaTime = 0;
+            if (PreferenceHelper.getGroupMarkersPreferences()){
+                addGroupedMarkersAndLines(map, points);
+            }else{
+                addMarkersAndLines(map, points);
+            }
 
-            int delta = calculateMarkerDistance(points.points.size());
-            if (delta < 0) return;
-            map.clear();
-            for (Point item: points.points) {
-                LatLng myLocation = new LatLng(item.latitude, item.longitude);
-                Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
+            zoomMap(map, points.getMinLatitude(), points.getMinLongitude(), points.getMaxLatitude(), points.getMaxLongitude());
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "Feil i Marker/Zoom delen");
+        }
+    }
+
+    private static void addGroupedMarkersAndLines(GoogleMap map, Positions points) {
+        boolean drawLines = PreferenceHelper.getDownloadAutomatically();
+        Point prev = null;
+        map.clear();
+
+        points.calculateAvgSpeed();
+        points.analyzeActivities();
+        points.printCsv();
+
+        for (Point item: points.points) {
+            LatLng myLocation = new LatLng(item.latitude, item.longitude);
+            Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
+
+            if (item.midPoint){
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(myLocation)
                         .title(item.getTime())
                         .snippet(item.getSnippet())
                         .icon(BitmapDescriptorFactory.defaultMarker(item.getSpeedColor()));
-                if (delta == 0 || PreferenceHelper.getDisplayEveryMarkerFromPreferences()){
-                    map.addMarker(markerOptions);
-                }else{
-                    if (prev != null){
-                        long diff = item.date.getTime() - prev.date.getTime();
-                        deltaTime = deltaTime + diff;
-                        if (diff >= delta * 1000 || deltaTime >= delta *1000){
-                            map.addMarker(markerOptions);
-                            deltaTime = 0;
-                        }
-                    }
-                }
-
-                if (prev != null && drawLines){
-                    map.addPolyline(new PolylineOptions()
-                            .add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude))
-                            .width(10)
-                            .color(item.getLineColor()));
-                }
-                prev = item;
+                map.addMarker(markerOptions);
             }
 
-            LatLngBounds myArea = new LatLngBounds(new LatLng(points.getMinLatitude(), points.getMinLongitude()), new LatLng(points.getMaxLatitude(), points.getMaxLongitude()));
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(myArea, 200);
-            map.moveCamera(cameraUpdate);
-            map.animateCamera(cameraUpdate);
+            if (prev != null && drawLines){
+                map.addPolyline(new PolylineOptions()
+                        .add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude))
+                        .width(10)
+                        .color(item.getLineColor(item.activity)));
+            }
+            prev = item;
+        }
+    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "Feil i Marker/Zoom delen");
+    private static void zoomMap(GoogleMap map, double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) {
+        LatLngBounds myArea = new LatLngBounds(new LatLng(minLatitude, minLongitude), new LatLng(maxLatitude, maxLongitude));
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(myArea, 200);
+        map.moveCamera(cameraUpdate);
+        map.animateCamera(cameraUpdate);
+    }
+
+    private static void addMarkersAndLines(GoogleMap map, Positions points) {
+        boolean drawLines = PreferenceHelper.getDownloadAutomatically();
+        Point prev = null;
+        long deltaTime = 0;
+
+        int delta = calculateMarkerDistance(points.points.size());
+        if (delta < 0) return;
+        map.clear();
+
+        for (Point item: points.points) {
+            LatLng myLocation = new LatLng(item.latitude, item.longitude);
+            Log.v(TAG, "Adding latitude: " + item.latitude + " longitude: " + item.longitude);
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(myLocation)
+                    .title(item.getTime())
+                    .snippet(item.getSnippet())
+                    .icon(BitmapDescriptorFactory.defaultMarker(item.getSpeedColor()));
+            if (delta == 0 || PreferenceHelper.getDisplayEveryMarkerFromPreferences()){
+                map.addMarker(markerOptions);
+            }else{
+                if (prev != null){
+                    long diff = item.date.getTime() - prev.date.getTime();
+                    deltaTime = deltaTime + diff;
+                    if (diff >= delta * 1000 || deltaTime >= delta *1000){
+                        map.addMarker(markerOptions);
+                        deltaTime = 0;
+                    }
+                }
+            }
+
+            if (prev != null && drawLines){
+                map.addPolyline(new PolylineOptions()
+                        .add(new LatLng(prev.latitude, prev.longitude), new LatLng(item.latitude, item.longitude))
+                        .width(10)
+                        .color(item.getLineColor()));
+            }
+            prev = item;
         }
     }
 

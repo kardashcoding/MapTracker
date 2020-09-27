@@ -15,18 +15,18 @@
     <PreferenceCategory app:title="@string/gps_header">
 
         <ListPreference
-            app:defaultValue="5"
+            app:defaultValue="4"
             app:entries="@array/seconds_array_entries"
             app:entryValues="@array/seconds_array_values"
-            app:key="key_seconds"
+            app:key="key_min_seconds"
             app:title="@string/seconds_title"
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            app:defaultValue="5"
+            app:defaultValue="6"
             app:entries="@array/distance_array_entries"
             app:entryValues="@array/distance_array_values"
-            app:key="key_distance"
+            app:key="key_min_distance"
             app:title="@string/distance_title"
             android:summary="@string/distance_summary"
             app:useSimpleSummaryProvider="true" />
@@ -59,12 +59,18 @@
     <PreferenceCategory app:title="@string/sync_header">
 
         <SwitchPreferenceCompat
+            app:key="key_cloud"
+            app:title="Sync with cloud" />
+
+        <SwitchPreferenceCompat
             app:key="key_sync"
-            app:title="@string/sync_title" />
+            app:title="@string/sync_title"
+            app:dependency="key_cloud"
+            />
 
         <SwitchPreferenceCompat
             app:defaultValue="true"
-            app:dependency="key_sync"
+            app:dependency="key_cloud"
             app:key="key_download"
             app:summaryOff="@string/download_summary_off"
             app:summaryOn="@string/download_summary_on"
@@ -98,6 +104,11 @@
         <SwitchPreference app:defaultValue="false"
             android:title="Display every marker"
             android:key="key_marker"/>
+
+        <SwitchPreference app:defaultValue="false"
+            android:title="Group"
+            android:summary="Group markers by activity"
+            android:key="key_group"/>
 
     </PreferenceCategory>
 

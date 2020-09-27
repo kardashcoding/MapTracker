@@ -33,7 +33,7 @@ public class PreferenceHelper {
     public static int getSecondsFromPreferences(Context context){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
-            String value = p.getString("key_seconds", "5");
+            String value = p.getString("key_min_seconds", "5");
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -44,7 +44,7 @@ public class PreferenceHelper {
     public static int getDistanceFromPreferences(Context context){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(context);
-            String value = p.getString("key_distance", "5");
+            String value = p.getString("key_min_distance", "5");
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -82,6 +82,16 @@ public class PreferenceHelper {
         }
     }
 
+    public static boolean getGroupMarkersPreferences(){
+        try{
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_group", false);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     static boolean getDrawLinesFromPreferences(){
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
@@ -102,6 +112,15 @@ public class PreferenceHelper {
         }
     }
 
+    static boolean getUseCloudWifi() {
+        try {
+            SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
+            return p.getBoolean("key_cloud", true);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return true;
+        }
+    }
     static boolean getSyncOnlyOnWifi() {
         try {
             SharedPreferences p =  PreferenceManager.getDefaultSharedPreferences(MapsActivity.getAppContext());
