@@ -61,7 +61,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     private PositionRow createRandomRow(){
         String guid = java.util.UUID.randomUUID().toString();
-        return new PositionRow(guid, "a", 1,2,3,4,5,null,"wifi", null, false);
+        return new PositionRow("gud", "dev", 1,2,3,4,5,6,null, "wifi", "deleted", false);
     }
 
     @Override

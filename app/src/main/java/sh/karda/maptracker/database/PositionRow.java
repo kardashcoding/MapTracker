@@ -58,17 +58,25 @@ public class PositionRow {
         this.latitude = latitude;
         this.accuracy = accuracy;
         this.height = height;
-        this.speed = speed;
-        this.date = date;
-        this.wifi = wifi;
-        this.deleted = deleted;
-        this.connectedToWifi = connectedToWifi;
+        setSpeed(speed);
+        setDate(date);
+        setWifi(wifi);
+        setDeleted(deleted);
+        setConnectedToWifi(connectedToWifi);
         this.sent = false;
         this.distance = distance;
     }
 
-    public String getGuid() {
-        return guid;
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance){
+        this.distance = distance;
+    }
+
+    public String getGuid(){
+        return this.guid;
     }
 
     public void setGuid(String guid) {

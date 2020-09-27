@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -29,8 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
-import sh.karda.maptracker.database.DbAsyncInsert;
-import sh.karda.maptracker.database.DbManager;
 
 import static sh.karda.maptracker.MapsActivity.KEY_REQUESTING_LOCATION_UPDATES;
 
