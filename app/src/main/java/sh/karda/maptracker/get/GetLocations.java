@@ -1,14 +1,9 @@
 package sh.karda.maptracker.get;
 
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,13 +12,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
-import sh.karda.maptracker.R;
-import sh.karda.maptracker.map.MapHelper;
 import sh.karda.maptracker.dto.Point;
 import sh.karda.maptracker.dto.Positions;
+import sh.karda.maptracker.map.MapHelper;
 
 public class GetLocations extends AsyncTask<Void, Void, Positions> {
     private GoogleMap map;
